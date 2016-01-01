@@ -8,6 +8,7 @@ import java.nio.charset.Charset;
 
 import net.wasamon.geister.server.Board;
 import net.wasamon.geister.server.Item;
+import net.wasamon.geister.utils.Constant;
 import net.wasamon.geister.utils.Direction;
 
 public abstract class BasePlayer {
@@ -20,13 +21,16 @@ public abstract class BasePlayer {
     private SocketChannel channel;
     private boolean won;
     private boolean lost;
+
+    public final int OwnPlayerId = 0;
+    public final int OppositePlayerId = 1;
 	
     /**
      * Constructor, opens TCP connection
      * @param pid player id, Player.ID.PLAYER_0 or BasicPlayer.ID.PLAYER_1
      */
     public final void init(ID id) throws IOException{
-	int port = id == ID.PLAYER_0 ? 10000 : 10001;
+	int port = id == ID.PLAYER_0 ? Constant.PLAYER_1st_PORT : Constant.PLAYER_2nd_PORT;
 	try{
 	    channel = SocketChannel.open(new InetSocketAddress(port));
 	    channel.configureBlocking(true);
@@ -36,6 +40,15 @@ public abstract class BasePlayer {
 	won = false;
 	lost = false;
 	recv();
+    }
+
+    public final void close() throws IOException{
+	channel.close();
+    }
+
+    private boolean verbose = false;
+    public final void setVerbose(boolean flag){
+	verbose = flag;
     }
 	
     private String boardInfo = "";
@@ -54,12 +67,12 @@ public abstract class BasePlayer {
 	    boardInfo = s;
 	    lost = true;
 	}
-	System.out.println(s);
+	if(verbose) System.out.println(s);
 	return s;
     }
 
     private void send(String msg) throws IOException{
-	System.out.println(msg);
+	if(verbose) System.out.println(msg);
 	channel.write(ByteBuffer.wrap(msg.getBytes()));
     }
 	
@@ -101,18 +114,62 @@ public abstract class BasePlayer {
 	return Board.decode(str);
     }
 	
-    public void printBoard(){
-	System.out.println(" opposite");
-	System.out.println(getBoard().getBoardMap(0));
-	System.out.println(" own side");
-    }
-	
     public Item[] getOwnItems(){
-	return getBoard().getPlayer(0).getItems();
+	return getBoard().getPlayer(OwnPlayerId).getItems();
     }
     
     public Item[] getOppositeItems(){
-	return getBoard().getPlayer(1).getItems();
+	return getBoard().getPlayer(OppositePlayerId).getItems();
     }
 
+    public Item[] getOwnTakenItems(){
+	return getBoard().getPlayer(OwnPlayerId).getTakenItems();
+    }
+    
+    public Item[] getOppositeTakenItems(){
+	return getBoard().getPlayer(OppositePlayerId).getTakenItems();
+    }
+
+    public void printBoard(){
+	Board b = getBoard();
+	System.out.println(" opposite");
+	System.out.println(b.getBoardMap(OwnPlayerId));
+	System.out.println(" own side");
+	// print all items
+        System.out.print("own items:");
+        for(Item i: b.getPlayer(OwnPlayerId).getItems()){
+	    System.out.print(" " + i.getName() + ":" + i.getColor().getSymbol());
+        }
+        System.out.println();
+        System.out.print("opposite player's items:");
+        for(Item i: b.getPlayer(OppositePlayerId).getItems()){
+	    System.out.print(" " + i.getName().toLowerCase() + ":" + i.getColor().getSymbol());
+        }
+        System.out.println("");
+        
+        // print taken items
+        System.out.print("taken own items:");
+        for(Item i: b.getPlayer(OwnPlayerId).getTakenItems()){
+	    System.out.print(" " + i.getName() + ":" + i.getColor().getSymbol());
+        }
+        System.out.println("");
+        System.out.print("taken opposite player's items:");
+        for(Item i: b.getPlayer(OppositePlayerId).getTakenItems()){
+	    System.out.print(" " + i.getName().toLowerCase() + ":" + i.getColor().getSymbol());
+        }
+        System.out.println("");
+        
+        // print escaped items
+        System.out.print("escaped own player's items:");
+        for(Item i: b.getPlayer(OwnPlayerId).getEscapedItems()){
+	    System.out.print(" " + i.getName() + ":" + i.getColor().getSymbol());
+        }
+        System.out.println("");
+        System.out.print("escaped opposite player's items:");
+        for(Item i: b.getPlayer(OppositePlayerId).getEscapedItems()){
+	    System.out.print(" " + i.getName().toLowerCase() + ":" + i.getColor().getSymbol());
+        }
+        System.out.println("");
+	
+    }
 }

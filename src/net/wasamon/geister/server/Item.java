@@ -23,6 +23,10 @@ public class Item {
 	this.y = y;
 	this.color = ItemColor.BLUE;
     }
+
+    public String toString(){
+	return name + ":" + color + "(" + x + "," + y + ")" + "@" + player;
+    }
 	
     public void setTaken(){
 	x = Constant.TAKEN_MARK; 
