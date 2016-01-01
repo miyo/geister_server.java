@@ -65,7 +65,6 @@ public abstract class BasePlayer {
 	    }
 	    bb.flip();
 	    s += Charset.defaultCharset().decode(bb).toString();
-	    System.out.println(s);
 	}while(!s.endsWith("\r\n"));
 	       
 	if(s.startsWith("MOV?")){
