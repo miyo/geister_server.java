@@ -1,4 +1,4 @@
-# geister_server
+# geister_server (Java version)
 
 Geister用のゲームサーバ(作りかけ)．
 
@@ -20,7 +20,7 @@ Geister用のゲームサーバ(作りかけ)．
 - コマが赤/青はゲーム開始前に，それぞれのクライアントに設定してもらう
 
 ## ゲームの進行(仮)
-- サーバー: python socket_server.pyで2つのプレーヤインスタンス(それぞれ8個のコマを持つ)を生成してクライアントからの通信を待つ
+- サーバー: java net.wasamon.geister.TCPServerで2つのプレーヤインスタンス(それぞれ8個のコマを持つ)を生成してクライアントからの通信を待つ
  - 先手のクライアントは10000番，後手のクライアントは10001番で待ち受ける
 - クライアント: クライアントは先手/後手に応じて10000番/10001番に接続．recvして"SET?"という文字列を受信する
 - クライアント: クライアントは赤オバケを4つセットし，recvする
@@ -46,7 +46,7 @@ Geister用のゲームサーバ(作りかけ)．
 
 ## 実行例
 ### サーバー
-    python socket_server.py
+    java -cp bin net.wasamon.geister.server.TCPServer
 
 ### クライアント0(先手番)/iPythonでインタラクティブ入力の例:
     In [5]: s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
