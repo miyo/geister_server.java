@@ -54,6 +54,7 @@ Geister用のゲームサーバ(作りかけ)．
     
 ### テスト用クライアント
 それぞれ別のターミナルなどで起動する
+
     java -cp geister.jar net.wasamon.geister.player.RandomPlayer 0 # 1st playerとして
     java -cp geister.jar net.wasamon.geister.player.RandomPlayer 1 # 2nd playerとして
 
