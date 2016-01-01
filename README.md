@@ -37,6 +37,7 @@ Geister用のゲームサーバ(作りかけ)．
 - クライアント: 先手番のクライアントは手を打ち，recvする．
  - 手を打つには， MOV:A,NORTH\r\n のように動かすコマ名と方角を送る
  - 方角はNORTH/EAST/WEST/SOUTHの4種類
+  - それぞれ，N/E/W/Sの1文字で指定することも可
  - 正しいコマンドでない場合はNGが返る
  - 正しいコマンドであった場合，次に盤面情報が送られてくるまで待つことになる
 - サーバー: サーバーは先手番の手を受理したら，後手番のクライアントに更新後の盤面情報を送る
@@ -45,42 +46,15 @@ Geister用のゲームサーバ(作りかけ)．
  - 勝った方にはWON，負けた方にはLSTを送る．
 
 ## 実行例
+### コンパイル
+    ant jar
+
 ### サーバー
-    java -cp bin net.wasamon.geister.server.TCPServer
+    java -jar geister.jar
+    
+### テスト用クライアント
+それぞれ別のターミナルなどで起動する
+    java -cp geister.jar net.wasamon.geister.player.RandomPlayer 0 # 1st playerとして
+    java -cp geister.jar net.wasamon.geister.player.RandomPlayer 1 # 2nd playerとして
 
-### クライアント0(先手番)/iPythonでインタラクティブ入力の例:
-    In [5]: s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    In [6]: s.connect(("localhost", 10000)); s.recv(4096)
-    Out[6]: b'SET?\r\n'
-    In [7]: s.send(b"SET:EFGH\r\n"); s.recv(4096) # 赤のコマをセット．クライアント1のSETコマンド完了までブロック
-    Out[7]: b'MOV?14B24B34B44B15R25R35R45R41u31u21u11u40u30u20u10u\r\n' # クライアント1のSETコマンド(In[5])の結果，サーバーから送られてきた
-    In [8]: s.send(b"MOV:A,NORTH\r\n"); s.recv(4096) # コマAを北に一つすすめる．クライアント1のMOVコマンド完了までブロック
-    Out[8]: b'MOV?13B24B34B44B15R25R35R45R42u31u21u11u40u30u20u10u\r\n' # クライアントのMOVコマンド(IN[6]) の結果，サーバーから送られてきた
-    In [9]: s.send(b"MOV:A,NORTH\r\n"); s.recv(4096)
-    Out[9]: b'MOV?12B24B34B44B15R25R35R45R43u31u21u11u40u30u20u10u\r\n'
-    In [10]: s.send(b"MOV:A,NORTH\r\n"); s.recv(4096)
-    Out[10]: b'MOV?11B24B34B99b15R25R35R45R44u31u21u99r40u30u20u10u\r\n'
-    In [11]: s.send(b"MOV:A,NORTH\r\n"); s.recv(4096)
-    Out[11]: b'MOV?10B24B34B99b15R25R35R99r45u31u21u99r40u30u20u99b\r\n'
-    In [12]: s.send(b"MOV:A,WEST\r\n"); s.recv(4096)
-    Out[12]: b'MOV?00B24B34B99b15R25R35R99r55u31u21u99r40u30u20u99b\r\n'
-    In [13]: s.send(b"MOV:A,WEST\r\n"); s.recv(4096)
-    Out[13]: b'WON:88b24B34B99b15R25R35R99r55u31u21u99r40u30u20u99b\r\n' # 勝負がついた．こちらの勝ちと終局情報
-
-### クライアント1(後手番)/iPythonでインタラクティブ入力の例:
-    In [2]: import socket
-    In [3]: s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    In [4]: s.connect(("localhost", 10001)); s.recv(4096)
-    Out[4]: b'SET?\r\n'
-    In [5]: s.send(b"SET:ABCD\r\n"); s.recv(4096) # # 赤のコマをセット．クライアント0のMOVコマンド完了までブロック
-    Out[5]: b'MOV?14R24R34R44R15B25B35B45B42u31u21u11u40u30u20u10u\r\n' # クライアント0のMOVコマンド(In[8])の結果，サーバーから送られてきた
-    In [6]: s.send(b"MOV:A,NORTH\r\n"); s.recv(4096) # コマAを北に一つすすめる．クライアント0のMOVコマンド完了までブロック
-    Out[6]: b'MOV?13R24R34R44R15B25B35B45B43u31u21u11u40u30u20u10u\r\n'
-    In [7]: s.send(b"MOV:A,NORTH\r\n"); s.recv(4096)
-    Out[7]: b'MOV?12R24R34R99r15B25B35B45B44u31u21u11u40u30u20u10u\r\n'
-    In [8]: s.send(b"MOV:A,NORTH\r\n"); s.recv(4096)
-    Out[8]: b'MOV?11R24R34R99r15B25B35B99b45u31u21u99b40u30u20u10u\r\n'
-    In [9]: s.send(b"MOV:A,NORTH\r\n"); s.recv(4096)
-    Out[9]: b'MOV?10R24R34R99r15B25B35B99b55u31u21u99b40u30u20u99r\r\n'
-    In [10]: s.send(b"MOV:A,WEST\r\n"); s.recv(4096)
-    Out[10]: b'LST:00R24R34R99r15B25B35B99b88b31u21u99b40u30u20u99r\r\n' # 勝負がついた．こちらの負けと終局情報
+プロトコルの詳細については https://github.com/miyo/geister_server も参照してください．

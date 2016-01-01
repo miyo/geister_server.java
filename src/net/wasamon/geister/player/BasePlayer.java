@@ -54,10 +54,20 @@ public abstract class BasePlayer {
     private String boardInfo = "";
 	
     private String recv() throws IOException{
+	String s = "";
 	ByteBuffer bb = ByteBuffer.allocate(2048);
-	channel.read(bb);
-	bb.flip();
-	String s = Charset.defaultCharset().decode(bb).toString();
+	
+	do{
+	    bb.clear();
+	    int len = channel.read(bb);
+	    if(len == -1){
+		throw new RuntimeException("channel is not opend");
+	    }
+	    bb.flip();
+	    s += Charset.defaultCharset().decode(bb).toString();
+	    System.out.println(s);
+	}while(!s.endsWith("\r\n"));
+	       
 	if(s.startsWith("MOV?")){
 	    boardInfo = s;
 	}else if(s.startsWith("WON")){
@@ -73,7 +83,10 @@ public abstract class BasePlayer {
 
     private void send(String msg) throws IOException{
 	if(verbose) System.out.println(msg);
-	channel.write(ByteBuffer.wrap(msg.getBytes()));
+	int len = 0;
+	do{
+	    len += channel.write(ByteBuffer.wrap(msg.getBytes()));
+	}while(len < msg.length());
     }
 	
     private boolean isFailed(String mesg){
