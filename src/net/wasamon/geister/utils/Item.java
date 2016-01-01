@@ -1,8 +1,4 @@
-package net.wasamon.geister.server;
-
-import net.wasamon.geister.utils.Constant;
-import net.wasamon.geister.utils.Direction;
-import net.wasamon.geister.utils.ItemColor;
+package net.wasamon.geister.utils;
 
 /**
  * Item, which is blue or red

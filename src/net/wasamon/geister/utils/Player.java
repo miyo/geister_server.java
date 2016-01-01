@@ -1,9 +1,6 @@
-package net.wasamon.geister.server;
+package net.wasamon.geister.utils;
 
 import java.util.ArrayList;
-
-import net.wasamon.geister.utils.Direction;
-import net.wasamon.geister.utils.ItemColor;
 
 /**
  * A agent of Gesiter player on a server board

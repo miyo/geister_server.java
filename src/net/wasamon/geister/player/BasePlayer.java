@@ -6,8 +6,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 
-import net.wasamon.geister.server.Board;
-import net.wasamon.geister.server.Item;
+import net.wasamon.geister.utils.Board;
+import net.wasamon.geister.utils.Item;
 import net.wasamon.geister.utils.Constant;
 import net.wasamon.geister.utils.Direction;
 
