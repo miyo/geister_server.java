@@ -7,6 +7,7 @@ import net.wasamon.geister.utils.Direction;
 import net.wasamon.geister.utils.ItemColor;
 import net.wasamon.geister.utils.Board;
 import net.wasamon.geister.utils.Item;
+import net.wasamon.geister.utils.Constant;
 
 /**
  * 
@@ -26,6 +27,7 @@ public class GameServer {
     private Board board;
     private int winner;
     private boolean[] init_flags;
+    private int turn_counter = 0;
 	
     public GameServer(){
 	init();
@@ -44,6 +46,7 @@ public class GameServer {
 	this.state = STATE.WAIT_FOR_INITIALIZATION;
 	this.winner = -1;
 	init_flags = new boolean[]{false, false};
+	turn_counter = 0;
     }
 	
     private Pattern SET_COMMAND = Pattern.compile("^SET:(\\w*)");	
@@ -82,6 +85,7 @@ public class GameServer {
 		if(d != null && 'A' <= k && k <= 'H'){
 		    flag = board.getPlayer(pid).move(new Character(k).toString(), d);
                     if(flag){
+			turn_counter++;
                     	boolean judge = judgement();
                     	System.out.println("judge: " + judge);
                         if(judge){
@@ -130,6 +134,10 @@ public class GameServer {
             	winner = pid;
                 return true;
             }
+	}
+	if(turn_counter == Constant.MAX_TURN_COUNT){
+	    winner = Constant.DRAW_MARK;
+	    return true;
 	}
         return false;
     }

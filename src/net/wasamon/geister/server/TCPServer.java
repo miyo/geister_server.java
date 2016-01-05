@@ -76,9 +76,14 @@ public class TCPServer{
 		send(playerChannels[1], "MOV?" + server.getEncodedBoard(1) + "\r\n");
 	    }else if(server.getState() == GameServer.STATE.GAME_END){
 		int winner = server.getWinner();
-		int loser = winner == 0 ? 1 : 0; 
-		send(playerChannels[winner], "WON:" + server.getEncodedBoard(winner) + "\r\n");
-		send(playerChannels[loser], "LST:" + server.getEncodedBoard(loser) + "\r\n");
+		if(winner == Constant.DRAW_MARK){
+		    send(playerChannels[0], "DRW:" + server.getEncodedBoard(0) + "\r\n");
+		    send(playerChannels[1], "DRW:" + server.getEncodedBoard(1) + "\r\n");
+		}else{
+		    int loser = winner == 0 ? 1 : 0; 
+		    send(playerChannels[winner], "WON:" + server.getEncodedBoard(winner) + "\r\n");
+		    send(playerChannels[loser], "LST:" + server.getEncodedBoard(loser) + "\r\n");
+		}
 		restart();
 	    }
 	}else{

@@ -21,6 +21,7 @@ public abstract class BasePlayer {
     private SocketChannel channel;
     private boolean won;
     private boolean lost;
+    private boolean draw;
 
     public final int OwnPlayerId = 0;
     public final int OppositePlayerId = 1;
@@ -39,6 +40,7 @@ public abstract class BasePlayer {
 	}
 	won = false;
 	lost = false;
+	draw = false;
 	recv();
     }
 
@@ -75,6 +77,9 @@ public abstract class BasePlayer {
 	}else if(s.startsWith("LST")){
 	    boardInfo = s;
 	    lost = true;
+	}else if(s.startsWith("DRW")){
+	    boardInfo = s;
+	    draw = true;
 	}
 	if(verbose) System.out.println(s);
 	return s;
@@ -113,12 +118,16 @@ public abstract class BasePlayer {
 	return won;
     }
 	
-    public boolean isLooser(){
+    public boolean isLoser(){
 	return lost;
+    }
+    
+    public boolean isDraw(){
+	return draw;
     }
 	
     public boolean isEnded(){
-	return isWinner() || isLooser();
+	return isWinner() || isLoser() || isDraw();
     }
 	
     private Board getBoard(){

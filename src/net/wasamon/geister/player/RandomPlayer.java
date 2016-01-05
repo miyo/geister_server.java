@@ -30,8 +30,10 @@ public class RandomPlayer extends BasePlayer{
 	}
 	if(p.isWinner()){
 	    System.out.println("won");
-	}else{
+	}else if(p.isLoser()){
 	    System.out.println("lost");
+	}else if(p.isDraw()){
+	    System.out.println("draw");
 	}
     }
 
