@@ -113,7 +113,16 @@ public abstract class BasePlayer {
 	    return false;
 	}
     }
-	
+
+    public boolean move(String cmd) throws IOException{
+	if(isEnded() == false){
+	    send("MOV:" + cmd + "\r\n");
+	    return !isFailed(recv());
+	}else{
+	    return false;
+	}
+    }
+
     public boolean isWinner(){
 	return won;
     }
