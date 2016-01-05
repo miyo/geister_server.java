@@ -53,9 +53,16 @@ Geister用のゲームサーバ(作りかけ)．
     java -jar geister.jar
     
 ### テスト用クライアント
-それぞれ別のターミナルなどで起動する
+それぞれ別のターミナルなどで起動する．
 
     java -cp geister.jar net.wasamon.geister.player.RandomPlayer 0 # 1st playerとして
     java -cp geister.jar net.wasamon.geister.player.RandomPlayer 1 # 2nd playerとして
+
+### テスト用クライアント(2)
+HumanPlayerを使うと標準入力から手を入力できます．
+
+    java -cp geister.jar net.wasamon.geister.player.RandomPlayer 0 # 1st playerとして
+    java -cp geister.jar net.wasamon.geister.player.HumanPlayer 1 # 2nd playerとして
+
 
 プロトコルの詳細については https://github.com/miyo/geister_server も参照してください．
