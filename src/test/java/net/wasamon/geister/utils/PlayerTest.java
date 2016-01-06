@@ -11,7 +11,7 @@ import org.junit.Test;
 public class PlayerTest {
 
 	@Test
-	public void testPlayer() {
+	public void testPlayer() { // todo
 		Board b = new Board();
 		Item[] items = b.getPlayer(0).getItems();
 		for(int i = 0; i < items.length; i++){
@@ -21,7 +21,7 @@ public class PlayerTest {
 	}
 
 	@Test
-	public void test_ntoi() {
+	public void test_ntoi() { // todo
 		try{
 			Method method = Player.class.getDeclaredMethod("ntoi", String.class);
 			method.setAccessible(true);
@@ -33,7 +33,7 @@ public class PlayerTest {
 	}
 
 	@Test
-	public void test_iton() {
+	public void test_iton() { // todo
 		try{
 			Method method = Player.class.getDeclaredMethod("iton", int.class);
 			method.setAccessible(true);

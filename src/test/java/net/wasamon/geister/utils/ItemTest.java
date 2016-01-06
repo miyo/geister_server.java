@@ -9,7 +9,7 @@ public class ItemTest {
 	Board b = new Board();
 
 	@Test
-	public void testSetTaken() {
+	public void testSetTaken() { // todo
 		Item item = new Item(b.getPlayer(0), "A", 0, 0);
 		item.setTaken();
 		assertEquals(Constant.TAKEN_MARK, item.getX());
@@ -17,7 +17,7 @@ public class ItemTest {
 	}
 
 	@Test
-	public void testWillEscape() {
+	public void testWillEscape() { // todo
 		Item item = new Item(b.getPlayer(0), "A", 0, 0);
 		item.setColor(ItemColor.BLUE);
 		assertEquals(true, item.willEscape(Direction.NORTH));
@@ -26,7 +26,7 @@ public class ItemTest {
 	}
 
 	@Test
-	public void testIsMovable() {
+	public void testIsMovable() { // todo
 		Item item = new Item(b.getPlayer(0), "A", 0, 0);
 		item.setColor(ItemColor.BLUE);
 		assertEquals(true, item.isMovable(Direction.NORTH));
@@ -35,7 +35,7 @@ public class ItemTest {
 	}
 
 	@Test
-	public void testMove() {
+	public void testMove() { // todo
 		Item item = new Item(b.getPlayer(0), "A", 1, 0);
 		item.move(Direction.NORTH);
 		assertEquals(0, item.getY());
