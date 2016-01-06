@@ -44,25 +44,31 @@ Geister用のゲームサーバ(作りかけ)．
 - クライアント: 後手番のクライアントは手を打ち，recvする．
 - サーバー: 先手/後手のどちらかで勝負がついたら，両方に結果と終了時点での盤面情報を送る．
  - 勝った方にはWON，負けた方にはLSTを送る．
+ 
+対戦のプロトコルの詳細については https://github.com/miyo/geister_server も参照してください．
 
 ## 実行例
 ### コンパイル
-    ant jar
+    gradle jar
 
 ### サーバー
-    java -jar geister.jar
+    java -jar build/libs/geister.jar
     
 ### テスト用クライアント
 それぞれ別のターミナルなどで起動する．
 
-    java -cp geister.jar net.wasamon.geister.player.RandomPlayer localhost 10000 # 1st playerとして
-    java -cp geister.jar net.wasamon.geister.player.RandomPlayer localhost 10001 # 2nd playerとして
+    java -cp build/libs/geister.jar net.wasamon.geister.player.RandomPlayer localhost 10000 # 1st playerとして
+    java -cp build/libs/geister.jar net.wasamon.geister.player.RandomPlayer localhost 10001 # 2nd playerとして
 
 ### テスト用クライアント(2)
 HumanPlayerを使うと標準入力から手を入力できます．
 
-    java -cp geister.jar net.wasamon.geister.player.RandomPlayer localhost 10000 # 1st playerとして
-    java -cp geister.jar net.wasamon.geister.player.HumanPlayer localhost 10001 # 2nd playerとして
+    java -cp build/libs/geister.jar net.wasamon.geister.player.RandomPlayer localhost 10000 # 1st playerとして
+    java -cp bulid/libs/geister.jar net.wasamon.geister.player.HumanPlayer localhost 10001 # 2nd playerとして
 
+### 対戦の様子を観戦する
+WebSocketで対戦中の盤情報が配信されます．
 
-プロトコルの詳細については https://github.com/miyo/geister_server も参照してください．
+    resources/html/viewer.html
+
+をWebSocket対応のWebブラウザで開いてください．
