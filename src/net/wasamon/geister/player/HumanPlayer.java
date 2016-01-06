@@ -14,8 +14,7 @@ public class HumanPlayer extends BasePlayer{
 
     public static void main(String[] args) throws Exception{
 	HumanPlayer p = new HumanPlayer();
-	int id = Integer.parseInt(args[0]);
-	p.init(id == 0 ? BasePlayer.ID.PLAYER_0 : BasePlayer.ID.PLAYER_1);
+	p.init(args[0], Integer.parseInt(args[1]));
 	System.out.println("red ghosts? (ex. BCDE)");
 	System.out.println(p.setRedItems(p.readLine()));
 	p.printBoard();

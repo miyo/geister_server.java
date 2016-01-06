@@ -1,6 +1,7 @@
 package net.wasamon.geister.player;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -28,12 +29,12 @@ public abstract class BasePlayer {
 	
     /**
      * Constructor, opens TCP connection
-     * @param pid player id, Player.ID.PLAYER_0 or BasicPlayer.ID.PLAYER_1
+     * @param host server's name
+     * @param port server's port(1st player=10000, 2nd player=10001)
      */
-    public final void init(ID id) throws IOException{
-	int port = id == ID.PLAYER_0 ? Constant.PLAYER_1st_PORT : Constant.PLAYER_2nd_PORT;
+    public final void init(String host, int port) throws IOException{
 	try{
-	    channel = SocketChannel.open(new InetSocketAddress(port));
+	    channel = SocketChannel.open(new InetSocketAddress(InetAddress.getByName(host), port));
 	    channel.configureBlocking(true);
 	}catch(IOException e){
 	    throw new RuntimeException(e);
