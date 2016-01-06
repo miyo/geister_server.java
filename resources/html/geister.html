@@ -1,0 +1,23 @@
+<html>
+<head>
+  <title>Geist*r v0.1</title>
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+  <script type="text/javascript" src="geister.js"></script>
+  <style type="text/css">
+    canvas {
+    border: 1px solid #000000;
+    margine: 50px auto 0 auto;
+    display: block;
+    cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameboard"></canvas>
+  <input type="button" id="start" value="start" disabled></input>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <input type="checkbox" id="debug" value="debug">Debug Mode</input>
+  <script type="text/javascript">
+    new GameOfGeister();
+  </script>
+</body>

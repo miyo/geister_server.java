@@ -11,11 +11,14 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 
+import org.glassfish.tyrus.server.Server;
+
 import net.wasamon.geister.utils.Constant;
 
 public class TCPServer {
 
 	private final GameServer server;
+	Server webSocketServer = new Server("localhost", 8080, "/ws", null, UIWebSocketServer.class);
 
 	private Selector selector;
 	private ServerSocketChannel[] serverChannels;
@@ -91,7 +94,7 @@ public class TCPServer {
 		} else {
 			send(chan, "NG\r\n");
 		}
-
+		UIWebSocketServer.setMesg(server.getEncodedBoard(1, true)); // as global viewer mode
 		return str;
 
 	}
@@ -117,6 +120,11 @@ public class TCPServer {
 				} else if (key.isReadable()) {
 					doRead(selector, (SocketChannel) key.channel());
 				}
+			}
+			try{
+				Thread.sleep(1000);
+			}catch(InterruptedException e){
+				
 			}
 		}
 	}
@@ -176,8 +184,9 @@ public class TCPServer {
 		restart();
 	}
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 		TCPServer s = new TCPServer(new GameServer());
+		s.webSocketServer.start();
 		s.start();
 	}
 
