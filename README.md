@@ -72,3 +72,5 @@ WebSocketで対戦中の盤情報が配信されます．
     resources/html/viewer.html
 
 をWebSocket対応のWebブラウザで開いてください．
+
+![ビューワサンプル](./misc/viewer_image.png)
