@@ -1,0 +1,17 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  testCompile 'junit:junit:4.+'
+}
+
+jar.baseName = 'geister'
+
+jar {
+  manifest.attributes 'Main-Class': 'net.wasamon.geister.server.TCPServer'
+  from configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) }
+}
