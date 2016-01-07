@@ -18,11 +18,11 @@ public class UIWebSocketServer {
 	
 	public static String mesg = "null";
 	
-	static void setMesg(String mesg){
+	synchronized static void setMesg(String mesg){
 		UIWebSocketServer.mesg = mesg;
 	}
 
-	static String getMesg(){
+	synchronized static String getMesg(){
 		return UIWebSocketServer.mesg;
 	}
 
