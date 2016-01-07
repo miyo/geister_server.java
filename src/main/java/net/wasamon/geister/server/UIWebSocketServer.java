@@ -16,13 +16,13 @@ public class UIWebSocketServer {
 
 	private static final Queue<Session> sessions = new ConcurrentLinkedQueue<>();
 	
-	public static String mesg;
+	public static String mesg = "null";
 	
-	synchronized static void setMesg(String mesg){
+	static void setMesg(String mesg){
 		UIWebSocketServer.mesg = mesg;
 	}
 
-	synchronized static String getMesg(){
+	static String getMesg(){
 		return UIWebSocketServer.mesg;
 	}
 
@@ -42,8 +42,9 @@ public class UIWebSocketServer {
 	}
 
 	public static void broadcast() {
+		String mesg = getMesg();
 		sessions.forEach(session -> {
-			session.getAsyncRemote().sendText(getMesg());
+            session.getAsyncRemote().sendText(mesg);
 		});
 	}
 }
