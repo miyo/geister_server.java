@@ -80,7 +80,7 @@ WebSocketで対戦中の盤情報が配信されます．
 
 ![ビューワサンプル](./misc/viewer_image.png)
 
-### プレーヤを作る場合は
+## プレーヤを作る場合は
 TCPで通信すればよいので，何で作っても構いません．
 もしJavaで書くのであればsrc/wasamon/geister/player/BasePlayer.javaを継承すると楽かもしれません．
 その場合は，src/wasamon/geister/player/RandomPlayer.javaが参考になるかもしれません．
