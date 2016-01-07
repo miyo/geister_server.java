@@ -80,6 +80,8 @@
 
     GameOfGeister.prototype.playerB = null;
 
+    GameOfGeister.prototype.state = '';
+
     function GameOfGeister() {
       this.ws = new WebSocket('ws://localhost:8080/ws/geister');
       this.createCanvas();
@@ -104,17 +106,24 @@
     };
 
     GameOfGeister.prototype.update_info = function(e) {
-      var c, column, i, item, j, k, l, msg, ref, ref1, row, x, y;
+      var c, column, i, item, j, k, l, m, msg, ref, ref1, row, state, taken_1st, taken_2nd, x, y;
       msg = e.data;
       $('#message').text(msg);
+      if (msg.length < 5) {
+        return;
+      }
+      state = msg.slice(0, 3);
+      msg = msg.slice(4);
       this.currentCell = [];
+      taken_1st = [];
+      taken_2nd = [];
       for (row = j = 0, ref = this.numberOfRows; 0 <= ref ? j < ref : j > ref; row = 0 <= ref ? ++j : --j) {
         this.currentCell[row] = [];
-        for (column = k = 0, ref1 = this.numberOfColumns; 0 <= ref1 ? k < ref1 : k > ref1; column = 0 <= ref1 ? ++k : --k) {
+        for (column = l = 0, ref1 = this.numberOfColumns; 0 <= ref1 ? l < ref1 : l > ref1; column = 0 <= ref1 ? ++l : --l) {
           this.currentCell[row][column] = new CellState(row, column);
         }
       }
-      for (i = l = 0; l < 16; i = ++l) {
+      for (i = m = 0; m < 16; i = ++m) {
         item = msg.slice(3 * i, +(3 * i + 2) + 1 || 9e9);
         x = parseInt(item[0]);
         y = parseInt(item[1]);
@@ -127,8 +136,33 @@
           }
           this.currentCell[y + 1][x + 1].obj.color = this.str2color(c);
         }
+        if (x === 9) {
+          k = 'U';
+          if (this.str2color(c) === GeisterObj.COLOR_BLUE) {
+            k = '<font color="blue"><bold>B</bold></font>';
+          } else if (this.str2color(c) === GeisterObj.COLOR_RED) {
+            k = '<font color="red"><bold>R</bold></font>';
+          }
+          if (i < 9) {
+            taken_2nd.push(k);
+          } else {
+            taken_1st.push(k);
+          }
+        }
       }
-      return this.drawBoard();
+      $('#message').text('');
+      $('#message').html("1st Player's taken items: " + taken_1st + "<br>" + "2nd Player's taken items: " + taken_2nd);
+      this.drawBoard();
+      if (state === "WI0" && this.state !== "WI0") {
+        jAlert('1st player won', 'Game set');
+      }
+      if (state === "WI1" && this.state !== "WI1") {
+        jAlert('2nd player won', 'Game set');
+      }
+      if (state === "DRW" && this.state !== "DRW") {
+        jAlert('Draw', 'Game set');
+      }
+      return this.state = state;
     };
 
     GameOfGeister.prototype.ready_resources = function(f) {
@@ -159,9 +193,9 @@
     };
 
     GameOfGeister.prototype.readyGame = function() {
-      var column, j, k, ref, ref1, row, start;
+      var column, j, l, ref, ref1, row, start;
       for (row = j = 0, ref = this.numberOfRows; 0 <= ref ? j < ref : j > ref; row = 0 <= ref ? ++j : --j) {
-        for (column = k = 0, ref1 = this.numberOfColumns; 0 <= ref1 ? k < ref1 : k > ref1; column = 0 <= ref1 ? ++k : --k) {
+        for (column = l = 0, ref1 = this.numberOfColumns; 0 <= ref1 ? l < ref1 : l > ref1; column = 0 <= ref1 ? ++l : --l) {
           if (this.currentCell[row][column].obj.player === GeisterObj.PLAYER_A) {
             this.currentCell[row][column].obj.hidden = true;
           }
@@ -193,9 +227,9 @@
       for (row = j = 0, ref = this.numberOfRows; 0 <= ref ? j < ref : j > ref; row = 0 <= ref ? ++j : --j) {
         this.currentCell[row] = [];
         results.push((function() {
-          var k, ref1, results1;
+          var l, ref1, results1;
           results1 = [];
-          for (column = k = 0, ref1 = this.numberOfColumns; 0 <= ref1 ? k < ref1 : k > ref1; column = 0 <= ref1 ? ++k : --k) {
+          for (column = l = 0, ref1 = this.numberOfColumns; 0 <= ref1 ? l < ref1 : l > ref1; column = 0 <= ref1 ? ++l : --l) {
             results1.push(this.currentCell[row][column] = new CellState(row, column));
           }
           return results1;
@@ -234,9 +268,9 @@
       results = [];
       for (row = j = 0, ref = this.numberOfRows; 0 <= ref ? j < ref : j > ref; row = 0 <= ref ? ++j : --j) {
         results.push((function() {
-          var k, ref1, results1;
+          var l, ref1, results1;
           results1 = [];
-          for (column = k = 0, ref1 = this.numberOfColumns; 0 <= ref1 ? k < ref1 : k > ref1; column = 0 <= ref1 ? ++k : --k) {
+          for (column = l = 0, ref1 = this.numberOfColumns; 0 <= ref1 ? l < ref1 : l > ref1; column = 0 <= ref1 ? ++l : --l) {
             results1.push(this.drawCell(this.currentCell[row][column]));
           }
           return results1;

@@ -37,6 +37,7 @@ class GameOfGeister
         game_status : 'PREPARE'
         playerA : null
         playerB : null
+        state : ''
 
         constructor: ->
                 @ws = new WebSocket('ws://localhost:8080/ws/geister');
@@ -56,7 +57,12 @@ class GameOfGeister
         update_info: (e) ->
                 msg = e.data
                 $('#message').text(msg)
+                return if msg.length < 5
+                state = msg[0..2]
+                msg = msg[4..]
                 @currentCell = []
+                taken_1st = []
+                taken_2nd = []
                 for row in [0...@numberOfRows]
                         @currentCell[row] = []
                         for column in [0...@numberOfColumns]
@@ -72,7 +78,26 @@ class GameOfGeister
                                 else
                                         @currentCell[y+1][x+1].obj.player = GeisterObj.PLAYER_A
                                 @currentCell[y+1][x+1].obj.color = @str2color(c)
+                        if x == 9
+                                k = 'U'
+                                if @str2color(c) == GeisterObj.COLOR_BLUE
+                                        k = '<font color="blue"><bold>B</bold></font>'
+                                else if @str2color(c) == GeisterObj.COLOR_RED
+                                        k = '<font color="red"><bold>R</bold></font>'
+                                if i < 9
+                                        taken_2nd.push(k)
+                                else
+                                        taken_1st.push(k)
+                $('#message').text('')
+                $('#message').html(
+                        "1st Player's taken items: " + taken_1st + "<br>" +
+                        "2nd Player's taken items: " + taken_2nd
+                )
                 @drawBoard()
+                jAlert('1st player won', 'Game set') if state == "WI0" && @state != "WI0"
+                jAlert('2nd player won', 'Game set') if state == "WI1" && @state != "WI1"
+                jAlert('Draw', 'Game set') if state == "DRW" && @state != "DRW"
+                @state = state
 
         ready_resources: (f) ->
                 @arrow_img = new Image();

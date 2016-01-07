@@ -6,6 +6,7 @@ repositories {
 }
 
 dependencies {
+  compile fileTree(dir: 'libs', include: '*.jar')
   compile 'org.glassfish.tyrus:tyrus-server:1.+'
   compile 'org.glassfish.tyrus:tyrus-client:1.+'
   compile 'org.glassfish.tyrus:tyrus-container-grizzly:1.+'

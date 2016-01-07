@@ -14,6 +14,7 @@ import java.util.Iterator;
 import org.glassfish.tyrus.server.Server;
 
 import net.wasamon.geister.utils.Constant;
+import net.wasamon.mjlib.util.GetOpt;
 
 public class TCPServer {
 
@@ -24,9 +25,12 @@ public class TCPServer {
 	private ServerSocketChannel[] serverChannels;
 	private SocketChannel[] playerChannels;
 	private String[] restMesg;
+	
+	private final int wait_time;
 
-	public TCPServer(GameServer server) throws IOException {
+	public TCPServer(GameServer server, int wait_time) throws IOException {
 		this.server = server;
+		this.wait_time = wait_time;
 		selector = Selector.open();
 		serverChannels = new ServerSocketChannel[2];
 		serverChannels[0] = initChannel(Constant.PLAYER_1st_PORT);
@@ -73,7 +77,7 @@ public class TCPServer {
 			result = server.parse(cmd, pid);
 			server.pp();
 		}
-
+		String stateLabel = "MOV:";
 		if (result) {
 			if (server.getState() == GameServer.STATE.WAIT_FOR_PLAYER_0) {
 				send(playerChannels[0], "MOV?" + server.getEncodedBoard(0) + "\r\n");
@@ -84,19 +88,23 @@ public class TCPServer {
 				if (winner == Constant.DRAW_MARK) {
 					send(playerChannels[0], "DRW:" + server.getEncodedBoard(0) + "\r\n");
 					send(playerChannels[1], "DRW:" + server.getEncodedBoard(1) + "\r\n");
+					stateLabel = "DRW:";
 				} else {
 					int loser = winner == 0 ? 1 : 0;
 					send(playerChannels[winner], "WON:" + server.getEncodedBoard(winner) + "\r\n");
 					send(playerChannels[loser], "LST:" + server.getEncodedBoard(loser) + "\r\n");
+					stateLabel = winner == 0 ? "WI0:" : "WI1:";
 				}
-				restart();
 			}
 		} else {
 			send(chan, "NG\r\n");
 		}
-		UIWebSocketServer.setMesg(server.getEncodedBoard(1, true)); // as global viewer mode
+		UIWebSocketServer.setMesg(stateLabel + server.getEncodedBoard(1, true)); // as global viewer mode
+		
+		if(result && server.getState() == GameServer.STATE.GAME_END){
+			restart();
+		}
 		return str;
-
 	}
 
 	public void restart() throws IOException {
@@ -122,7 +130,7 @@ public class TCPServer {
 				}
 			}
 			try{
-				Thread.sleep(1000);
+				Thread.sleep(wait_time);
 			}catch(InterruptedException e){
 				
 			}
@@ -185,7 +193,12 @@ public class TCPServer {
 	}
 
 	public static void main(String[] args) throws Exception {
-		TCPServer s = new TCPServer(new GameServer());
+		GetOpt opt = new GetOpt("", "wait:", args);
+		int wait_time = 100;
+		if(opt.flag("wait")){
+			wait_time = Integer.parseInt(opt.getValue("wait"));
+		}
+		TCPServer s = new TCPServer(new GameServer(), wait_time);
 		s.webSocketServer.start();
 		s.start();
 	}
