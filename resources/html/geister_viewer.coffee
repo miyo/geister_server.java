@@ -72,7 +72,7 @@ class GameOfGeister
                         item = msg[3*i..3*i+2]
                         x = parseInt(item[0])
                         y = parseInt(item[1])
-                        c = item[2]
+                        c = item[2].toUpperCase()
                         if x < 6 and y < 6
                                 if i < 8
                                         @currentCell[y+1][x+1].obj.player = GeisterObj.PLAYER_B
