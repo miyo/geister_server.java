@@ -106,7 +106,7 @@
     };
 
     GameOfGeister.prototype.update_info = function(e) {
-      var c, column, i, item, j, k, l, m, msg, ref, ref1, row, state, taken_1st, taken_2nd, x, y;
+      var c, column, escape_player, i, info, item, j, k, l, m, msg, ref, ref1, row, state, taken_1st, taken_2nd, x, y;
       msg = e.data;
       $('#message').text(msg);
       if (msg.length < 5) {
@@ -117,6 +117,7 @@
       this.currentCell = [];
       taken_1st = [];
       taken_2nd = [];
+      escape_player = GeisterObj.PLAYER_NONE;
       for (row = j = 0, ref = this.numberOfRows; 0 <= ref ? j < ref : j > ref; row = 0 <= ref ? ++j : --j) {
         this.currentCell[row] = [];
         for (column = l = 0, ref1 = this.numberOfColumns; 0 <= ref1 ? l < ref1 : l > ref1; column = 0 <= ref1 ? ++l : --l) {
@@ -143,15 +144,28 @@
           } else if (this.str2color(c) === GeisterObj.COLOR_RED) {
             k = '<font color="red"><bold>R</bold></font>';
           }
-          if (i < 9) {
+          if (i < 8) {
             taken_2nd.push(k);
           } else {
             taken_1st.push(k);
           }
         }
+        if (x === 8) {
+          if (i < 8) {
+            escape_player = GeisterObj.PLAYER_B;
+          } else {
+            escape_player = GeisterObj.PLAYER_A;
+          }
+        }
+      }
+      info = "1st Player's taken items: " + taken_1st + "<br>" + "2nd Player's taken items: " + taken_2nd;
+      if (escape_player === GeisterObj.PLAYER_A) {
+        info += "<BR>" + "1st Player's ghost has escaped.";
+      } else if (escape_player === GeisterObj.PLAYER_B) {
+        info += "<BR>" + "2nd Player's ghost has escaped.";
       }
       $('#message').text('');
-      $('#message').html("1st Player's taken items: " + taken_1st + "<br>" + "2nd Player's taken items: " + taken_2nd);
+      $('#message').html(info);
       this.drawBoard();
       if (state === "WI0" && this.state !== "WI0") {
         jAlert('1st player won', 'Game set');

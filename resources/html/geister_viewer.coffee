@@ -63,6 +63,7 @@ class GameOfGeister
                 @currentCell = []
                 taken_1st = []
                 taken_2nd = []
+                escape_player = GeisterObj.PLAYER_NONE
                 for row in [0...@numberOfRows]
                         @currentCell[row] = []
                         for column in [0...@numberOfColumns]
@@ -84,15 +85,24 @@ class GameOfGeister
                                         k = '<font color="blue"><bold>B</bold></font>'
                                 else if @str2color(c) == GeisterObj.COLOR_RED
                                         k = '<font color="red"><bold>R</bold></font>'
-                                if i < 9
+                                if i < 8
                                         taken_2nd.push(k)
                                 else
                                         taken_1st.push(k)
-                $('#message').text('')
-                $('#message').html(
-                        "1st Player's taken items: " + taken_1st + "<br>" +
+                        if x == 8
+                                if i < 8
+                                        escape_player = GeisterObj.PLAYER_B
+                                else
+                                        escape_player = GeisterObj.PLAYER_A
+                info =  "1st Player's taken items: " + taken_1st + "<br>" +
                         "2nd Player's taken items: " + taken_2nd
-                )
+                if escape_player == GeisterObj.PLAYER_A
+                        info += "<BR>" + "1st Player's ghost has escaped."
+                else if escape_player == GeisterObj.PLAYER_B
+                        info += "<BR>" + "2nd Player's ghost has escaped."
+
+                $('#message').text('')
+                $('#message').html(info)
                 @drawBoard()
                 jAlert('1st player won', 'Game set') if state == "WI0" && @state != "WI0"
                 jAlert('2nd player won', 'Game set') if state == "WI1" && @state != "WI1"
