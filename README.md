@@ -5,6 +5,7 @@ Geister用のゲームサーバ(作りかけ)．
 ## 動作概要(仮)
 - 二つのクライアントとSocketで通信し，Geisterを進行する
 - ボードの管理，勝敗の管理をする
+- WebSocketで盤情報をキャストする
 
 ## 盤面(仮)
         0 1 2 3 4 5
@@ -53,7 +54,11 @@ Geister用のゲームサーバ(作りかけ)．
 
 ### サーバー
     java -jar build/libs/geister.jar
-    
+
+    java -jar build/libs/geister.jar --wait=1000
+
+とするとゲーム進行のウェイト時間(手を受理する最低待ち時間)を設定できます．
+
 ### テスト用クライアント
 それぞれ別のターミナルなどで起動する．
 
@@ -74,3 +79,9 @@ WebSocketで対戦中の盤情報が配信されます．
 をWebSocket対応のWebブラウザで開いてください．
 
 ![ビューワサンプル](./misc/viewer_image.png)
+
+### プレーヤを作る場合は
+TCPで通信すればよいので，何で作っても構いません．
+もしJavaで書くのであればsrc/wasamon/geister/player/BasePlayer.javaを継承すると楽かもしれません．
+その場合は，src/wasamon/geister/player/RandomPlayer.javaが参考になるかもしれません．
+
