@@ -65,7 +65,7 @@ public class TCPServer {
 		} while (len < msg.length());
 	}
 
-	private String action(SocketChannel chan, String str, int pid) throws IOException {
+	private boolean action(SocketChannel chan, String str, int pid) throws IOException {
 		boolean result = true;
 
 		while (true) {
@@ -77,6 +77,8 @@ public class TCPServer {
 			result = server.parse(cmd, pid);
 			server.pp();
 		}
+		restMesg[pid] = str;
+		
 		String stateLabel = "MOV:";
 		if (result) {
 			if (server.getState() == GameServer.STATE.WAIT_FOR_PLAYER_0) {
@@ -101,22 +103,14 @@ public class TCPServer {
 		}
 		UIWebSocketServer.setMesg(stateLabel + server.getEncodedBoard(1, true)); // as global viewer mode
 		
-		if(result && server.getState() == GameServer.STATE.GAME_END){
-			restart();
-		}
-		return str;
-	}
-
-	public void restart() throws IOException {
-		closePlayers();
-		server.init();
-		start();
+		return result;
 	}
 
 	public void start() throws IOException {
 		playerChannels = new SocketChannel[2];
 		restMesg = new String[] { "", "" };
 
+		SELECT_LOOP:
 		while (selector.select() > 0 || selector.selectedKeys().size() > 0) {
 			for (Iterator<SelectionKey> it = selector.selectedKeys().iterator(); it.hasNext();) {
 				SelectionKey key = it.next();
@@ -126,7 +120,20 @@ public class TCPServer {
 				} else if (key.isAcceptable()) {
 					doAccept(selector, (ServerSocketChannel) key.channel());
 				} else if (key.isReadable()) {
-					doRead(selector, (SocketChannel) key.channel());
+					boolean flag = true;
+					try{
+						flag = doRead(selector, (SocketChannel)key.channel());
+					}catch(IOException e){ // At least, a connection is disconnected during read.
+						flag = false;
+						if(playerChannels[0] != null && playerChannels[0].isConnected()){
+							send(playerChannels[0], "WON:" + server.getEncodedBoard(0) + "\r\n");
+						}else if(playerChannels[1] != null && playerChannels[1].isConnected()){
+							send(playerChannels[1], "WON:" + server.getEncodedBoard(0) + "\r\n");
+						}
+					}
+					if(flag == false){ // not should be continued.
+						break SELECT_LOOP;
+					}
 				}
 			}
 			try{
@@ -135,6 +142,9 @@ public class TCPServer {
 				
 			}
 		}
+		
+		closePlayers();
+		
 	}
 
 	private void doAccept(Selector selector, ServerSocketChannel server) throws IOException {
@@ -156,7 +166,10 @@ public class TCPServer {
 
 	private ByteBuffer bb = ByteBuffer.allocate(2048);
 
-	private void doRead(Selector selector, SocketChannel ch) throws IOException {
+	/**
+	 * This method does action and returns a flag whether game should be continued or not.
+	 */
+	private boolean doRead(Selector selector, SocketChannel ch) throws IOException {
 
 		int pid = 0;
 		if (ch == playerChannels[0]) {
@@ -165,7 +178,7 @@ public class TCPServer {
 			pid = 1;
 		} else { // should not receive from unknown socket...
 			ch.close();
-			return;
+			return true; // the game should be continued
 		}
 
 		bb.clear();
@@ -173,15 +186,23 @@ public class TCPServer {
 		if (len < 0) { // channel has been closed
 			System.out.println("connection closed: " + pid);
 			doIrregularJudgement(pid);
-			return;
+			return false; // game end
 		}
 
 		bb.flip();
 		String msg = Charset.defaultCharset().decode(bb).toString();
 		restMesg[pid] += msg;
+		boolean result = false;
 		if (restMesg[pid].indexOf("\r\n") > 0) { // at least, there is a message
-			restMesg[pid] = action(ch, restMesg[pid], pid);
+			result = action(ch, restMesg[pid], pid);
 		}
+		
+		if(result && server.getState() == GameServer.STATE.GAME_END){
+			return false; // game end
+		}else{
+			return true;
+		}
+		
 	}
 
 	private void doIrregularJudgement(int loser) throws IOException {
@@ -189,7 +210,6 @@ public class TCPServer {
 		if (playerChannels[winner] != null) {
 			send(playerChannels[winner], "WON:" + server.getEncodedBoard(winner) + "\r\n");
 		}
-		restart();
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -200,7 +220,10 @@ public class TCPServer {
 		}
 		TCPServer s = new TCPServer(new GameServer(), wait_time);
 		s.webSocketServer.start();
-		s.start();
+		while(true){
+			s.start();
+			s.server.init();
+		}
 	}
 
 }
