@@ -40,7 +40,9 @@ class GameOfGeister
         state : ''
 
         constructor: ->
-                @ws = new WebSocket('ws://localhost:8080/ws/geister');
+                hostname = window.location.hostname
+                hostname = "localhost" if hostname == ""
+                @ws = new WebSocket('ws://' + hostname + ':8080/ws/geister')
                 @createCanvas()
                 @resizeCanvas()
                 @createDrawingContext()
