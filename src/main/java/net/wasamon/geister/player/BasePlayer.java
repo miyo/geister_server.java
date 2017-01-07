@@ -15,8 +15,8 @@ import net.wasamon.geister.utils.Direction;
 public abstract class BasePlayer {
 	
     public enum ID{
-	PLAYER_0,
-	PLAYER_1
+		PLAYER_0,
+		PLAYER_1
     }
 	
     private SocketChannel channel;
@@ -33,172 +33,172 @@ public abstract class BasePlayer {
      * @param port server's port(1st player=10000, 2nd player=10001)
      */
     public final void init(String host, int port) throws IOException{
-	try{
-	    channel = SocketChannel.open(new InetSocketAddress(InetAddress.getByName(host), port));
-	    channel.configureBlocking(true);
-	}catch(IOException e){
-	    throw new RuntimeException(e);
-	}
-	won = false;
-	lost = false;
-	draw = false;
-	recv();
+		try{
+			channel = SocketChannel.open(new InetSocketAddress(InetAddress.getByName(host), port));
+			channel.configureBlocking(true);
+		}catch(IOException e){
+			throw new RuntimeException(e);
+		}
+		won = false;
+		lost = false;
+		draw = false;
+		recv();
     }
 
     public final void close() throws IOException{
-	channel.close();
+		channel.close();
     }
 
     private boolean verbose = false;
     public final void setVerbose(boolean flag){
-	verbose = flag;
+		verbose = flag;
     }
 	
     private String boardInfo = "";
 	
     private String recv() throws IOException{
-	String s = "";
-	ByteBuffer bb = ByteBuffer.allocate(2048);
+		String s = "";
+		ByteBuffer bb = ByteBuffer.allocate(2048);
 	
-	do{
-	    bb.clear();
-	    int len = channel.read(bb);
-	    if(len == -1){
-		throw new RuntimeException("channel is not opend");
-	    }
-	    bb.flip();
-	    s += Charset.defaultCharset().decode(bb).toString();
-	}while(!s.endsWith("\r\n"));
+		do{
+			bb.clear();
+			int len = channel.read(bb);
+			if(len == -1){
+				throw new RuntimeException("channel is not opend");
+			}
+			bb.flip();
+			s += Charset.defaultCharset().decode(bb).toString();
+		}while(!s.endsWith("\r\n"));
 	       
-	if(s.startsWith("MOV?")){
-	    boardInfo = s;
-	}else if(s.startsWith("WON")){
-	    boardInfo = s;
-	    won = true;
-	}else if(s.startsWith("LST")){
-	    boardInfo = s;
-	    lost = true;
-	}else if(s.startsWith("DRW")){
-	    boardInfo = s;
-	    draw = true;
-	}
-	if(verbose) System.out.println(s);
-	return s;
+		if(s.startsWith("MOV?")){
+			boardInfo = s;
+		}else if(s.startsWith("WON")){
+			boardInfo = s;
+			won = true;
+		}else if(s.startsWith("LST")){
+			boardInfo = s;
+			lost = true;
+		}else if(s.startsWith("DRW")){
+			boardInfo = s;
+			draw = true;
+		}
+		if(verbose) System.out.println(s);
+		return s;
     }
 
     private void send(String msg) throws IOException{
-	if(verbose) System.out.println(msg);
-	int len = 0;
-	do{
-	    len += channel.write(ByteBuffer.wrap(msg.getBytes()));
-	}while(len < msg.length());
+		if(verbose) System.out.println(msg);
+		int len = 0;
+		do{
+			len += channel.write(ByteBuffer.wrap(msg.getBytes()));
+		}while(len < msg.length());
     }
 	
     private boolean isFailed(String mesg){
-	return mesg.startsWith("NG");
+		return mesg.startsWith("NG");
     }
 	
     public boolean setRedItems(String keys) throws IOException{
-	if(keys.length() != 4){
-	    return false;
-	}
-	send("SET:" + keys + "\r\n");
-	return !isFailed(recv());
+		if(keys.length() != 4){
+			return false;
+		}
+		send("SET:" + keys + "\r\n");
+		return !isFailed(recv());
     }
 	
     public boolean move(String key, Direction dir) throws IOException{
-	if(isEnded() == false){
-	    send("MOV:" + key + "," + dir + "\r\n");
-	    return !isFailed(recv());
-	}else{
-	    return false;
-	}
+		if(isEnded() == false){
+			send("MOV:" + key + "," + dir + "\r\n");
+			return !isFailed(recv());
+		}else{
+			return false;
+		}
     }
 
     public boolean move(String cmd) throws IOException{
-	if(isEnded() == false){
-	    send("MOV:" + cmd + "\r\n");
-	    return !isFailed(recv());
-	}else{
-	    return false;
-	}
+		if(isEnded() == false){
+			send("MOV:" + cmd + "\r\n");
+			return !isFailed(recv());
+		}else{
+			return false;
+		}
     }
 
     public boolean isWinner(){
-	return won;
+		return won;
     }
 	
     public boolean isLoser(){
-	return lost;
+		return lost;
     }
     
     public boolean isDraw(){
-	return draw;
+		return draw;
     }
 	
     public boolean isEnded(){
-	return isWinner() || isLoser() || isDraw();
+		return isWinner() || isLoser() || isDraw();
     }
 	
     private Board getBoard(){
-	String str = boardInfo.substring("MOV?".length());
-	return Board.decode(str);
+		String str = boardInfo.substring("MOV?".length());
+		return Board.decode(str);
     }
 	
     public Item[] getOwnItems(){
-	return getBoard().getPlayer(OwnPlayerId).getItems();
+		return getBoard().getPlayer(OwnPlayerId).getItems();
     }
     
     public Item[] getOppositeItems(){
-	return getBoard().getPlayer(OppositePlayerId).getItems();
+		return getBoard().getPlayer(OppositePlayerId).getItems();
     }
 
     public Item[] getOwnTakenItems(){
-	return getBoard().getPlayer(OwnPlayerId).getTakenItems();
+		return getBoard().getPlayer(OwnPlayerId).getTakenItems();
     }
     
     public Item[] getOppositeTakenItems(){
-	return getBoard().getPlayer(OppositePlayerId).getTakenItems();
+		return getBoard().getPlayer(OppositePlayerId).getTakenItems();
     }
 
     public void printBoard(){
-	Board b = getBoard();
-	System.out.println(" opposite");
-	System.out.println(b.getBoardMap(OwnPlayerId));
-	System.out.println(" own side");
-	// print all items
+		Board b = getBoard();
+		System.out.println(" opposite");
+		System.out.println(b.getBoardMap(OwnPlayerId));
+		System.out.println(" own side");
+		// print all items
         System.out.print("own items:");
         for(Item i: b.getPlayer(OwnPlayerId).getItems()){
-	    System.out.print(" " + i.getName() + ":" + i.getColor().getSymbol());
+			System.out.print(" " + i.getName() + ":" + i.getColor().getSymbol());
         }
         System.out.println();
         System.out.print("opposite player's items:");
         for(Item i: b.getPlayer(OppositePlayerId).getItems()){
-	    System.out.print(" " + i.getName().toLowerCase() + ":" + i.getColor().getSymbol());
+			System.out.print(" " + i.getName().toLowerCase() + ":" + i.getColor().getSymbol());
         }
         System.out.println("");
         
         // print taken items
         System.out.print("taken own items:");
         for(Item i: b.getPlayer(OwnPlayerId).getTakenItems()){
-	    System.out.print(" " + i.getName() + ":" + i.getColor().getSymbol());
+			System.out.print(" " + i.getName() + ":" + i.getColor().getSymbol());
         }
         System.out.println("");
         System.out.print("taken opposite player's items:");
         for(Item i: b.getPlayer(OppositePlayerId).getTakenItems()){
-	    System.out.print(" " + i.getName().toLowerCase() + ":" + i.getColor().getSymbol());
+			System.out.print(" " + i.getName().toLowerCase() + ":" + i.getColor().getSymbol());
         }
         System.out.println("");
         
         // print escaped items
         System.out.print("escaped own player's items:");
         for(Item i: b.getPlayer(OwnPlayerId).getEscapedItems()){
-	    System.out.print(" " + i.getName() + ":" + i.getColor().getSymbol());
+			System.out.print(" " + i.getName() + ":" + i.getColor().getSymbol());
         }
         System.out.println("");
         System.out.print("escaped opposite player's items:");
         for(Item i: b.getPlayer(OppositePlayerId).getEscapedItems()){
-	    System.out.print(" " + i.getName().toLowerCase() + ":" + i.getColor().getSymbol());
+			System.out.print(" " + i.getName().toLowerCase() + ":" + i.getColor().getSymbol());
         }
         System.out.println("");
 	
