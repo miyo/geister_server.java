@@ -83,7 +83,7 @@
     GameOfGeister.prototype.state = '';
 
     function GameOfGeister() {
-      this.ws = new WebSocket('ws://localhost:8080/ws/geister');
+      this.ws = new WebSocket('ws://' + window.location.hostname + ':8080/ws/geister');
       this.createCanvas();
       this.resizeCanvas();
       this.createDrawingContext();
