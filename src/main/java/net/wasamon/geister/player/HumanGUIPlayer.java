@@ -26,7 +26,7 @@ public class HumanGUIPlayer extends BasePlayer {
     JFrame frame;
     final P[] own = new P[8];
     final P[] enemy = new P[8];
-    
+
     int takenRed = 0;
     int takenBlue = 0;
 
@@ -40,16 +40,19 @@ public class HumanGUIPlayer extends BasePlayer {
         }
     }
 
+    private String label = "Geister Human Player -";
+    
     public void makeGUI() {
-        frame = new JFrame("Geister Human Player");
+        frame = new JFrame();
+        frame.setTitle(label);
         frame.setResizable(false);
         frame.getContentPane().add(new Canvas(this));
         frame.pack();
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setVisible(true);
     }
-    
-    private void updateBoard(){
+
+    private void updateBoard() {
         Item[] items;
         items = getOwnItems();
         for (int i = 0; i < items.length; i++) {
@@ -65,24 +68,30 @@ public class HumanGUIPlayer extends BasePlayer {
         takenRed = 0;
         takenBlue = 0;
         for (int i = 0; i < items.length; i++) {
-            if(items[i].getColor() == ItemColor.RED){
+            if (items[i].getColor() == ItemColor.RED) {
                 takenRed++;
-            }else if(items[i].getColor() == ItemColor.BLUE){
+            } else if (items[i].getColor() == ItemColor.BLUE) {
                 takenBlue++;
             }
         }
         if (frame != null)
-            frame.repaint();
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    frame.repaint();
+                }
+            });
+
     }
 
     boolean moveFlag = false;
     String moveInst = "";
 
     public void start(String host, String port, String init) {
-        try{
+        try {
             init(host, Integer.parseInt(port));
             System.out.println(setRedItems(init));
-        }catch(IOException e){
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
         printBoard();
@@ -102,22 +111,38 @@ public class HumanGUIPlayer extends BasePlayer {
                 break GAME_LOOP;
             System.out.println("move ? (ex. A,N)");
             while (true) {
+                
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        frame.setTitle(label + " your turn");
+                    }
+                });
+                
                 if (moveFlag)
                     break;
-                try{
+                try {
                     Thread.sleep(300);
-                }catch(Exception e){
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
                 //System.out.println("wait user input...");
             }
-            moveFlag = false;
             System.out.println(moveInst);
-            try{
+            
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    frame.setTitle(label);
+                }
+            });
+            
+            try {
                 System.out.println(move(moveInst));
-            }catch(IOException e){
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+            moveFlag = false;
             printBoard();
             updateBoard();
         }
@@ -134,6 +159,7 @@ public class HumanGUIPlayer extends BasePlayer {
             status = "draw";
         }
         JOptionPane.showMessageDialog(frame, status);
+        System.exit(0);
     }
 
     public static void main(String[] args) throws Exception {
@@ -152,6 +178,7 @@ public class HumanGUIPlayer extends BasePlayer {
 class P {
     int x, y;
     ItemColor c = ItemColor.UNKNOWN;
+
     public P(int x, int y) {
         this.x = x;
         this.y = y;
@@ -200,6 +227,7 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
     }
 
     private Font font = new Font("Arial", Font.BOLD, 36);
+
     private void paintBoarder(Graphics g) {
         g.setColor(Color.BLACK);
         for (int i = 0; i < 7; i++) {
@@ -208,9 +236,9 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
         }
         g.setFont(font);
         g.drawImage(img_r, convX(2), convY(6), dim, dim, null);
-        g.drawString(String.valueOf(player.takenRed), convX(3), convY(7)-dim/2);
+        g.drawString(String.valueOf(player.takenRed), convX(3), convY(7) - dim / 2);
         g.drawImage(img_b, convX(4), convY(6), dim, dim, null);
-        g.drawString(String.valueOf(player.takenBlue), convX(5), convY(7)-dim/2);
+        g.drawString(String.valueOf(player.takenBlue), convX(5), convY(7) - dim / 2);
         g.drawImage(img_arrow_l, convX(0), convY(0), dim, dim, null);
         g.drawImage(img_arrow_r, convX(5), convY(0), dim, dim, null);
         g.drawImage(img_arrow_l, convX(0), convY(5), dim, dim, null);
@@ -223,7 +251,8 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
         g.setTransform(at);
         for (int i = 0; i < player.enemy.length; i++) {
             P p = player.enemy[i];
-            g.drawImage(img_u, convX(p.x), convY(p.y), dim, dim, null); // to rotate
+            g.drawImage(img_u, convX(p.x), convY(p.y), dim, dim, null); // to
+                                                                        // rotate
         }
         at.rotate(180 * Math.PI / 180.0, DIM / 2, DIM / 2);
         g.setTransform(at);
@@ -271,6 +300,7 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
     private int selectedY;
 
     public void mousePressed(MouseEvent e) {
+        if(player.moveFlag) return; // before receiving board info., user cannot send any commands 
         for (int i = 0; i < player.own.length; i++) {
             if (isInternal(player.own[i], e.getX(), e.getY())) {
                 selected = i;
@@ -281,8 +311,8 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
     }
 
     private P conv(int x, int y) {
-        int x0 = x-dim >= 0 ? (x-dim) / dim : -1;
-        int y0 = y-dim >= 0 ? (y-dim) / dim : -1;
+        int x0 = x - dim >= 0 ? (x - dim) / dim : -1;
+        int y0 = y - dim >= 0 ? (y - dim) / dim : -1;
         return new P(x0, y0);
     }
 
@@ -310,8 +340,10 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
 
     private boolean isMovable(P p0, P p1) {
         System.out.printf("isMovable from (%d,%d) -> (%d,%d)\n", p0.x, p0.y, p1.x, p1.y);
-        if (p0.c == ItemColor.BLUE && p0.x == 0 && p0.y == 0 && (p1.x == -1 || p1.y == -1)) return true; // escape
-        if (p0.c == ItemColor.BLUE && p0.x == 5 && p0.y == 0 && (p1.x == 6 || p1.y == -1)) return true; // escape
+        if (p0.c == ItemColor.BLUE && p0.x == 0 && p0.y == 0 && (p1.x == -1 || p1.y == -1))
+            return true; // escape
+        if (p0.c == ItemColor.BLUE && p0.x == 5 && p0.y == 0 && (p1.x == 6 || p1.y == -1))
+            return true; // escape
         if (p1.x < 0 || p1.x >= 6 || p1.y < 0 || p1.y >= 6)
             return false; // outside
         if (p0.x == p1.x && p0.y == p1.y)
