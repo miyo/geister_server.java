@@ -1,13 +1,19 @@
 package net.wasamon.geister.server;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.wasamon.geister.utils.Direction;
-import net.wasamon.geister.utils.ItemColor;
 import net.wasamon.geister.utils.Board;
-import net.wasamon.geister.utils.Item;
 import net.wasamon.geister.utils.Constant;
+import net.wasamon.geister.utils.Direction;
+import net.wasamon.geister.utils.Item;
+import net.wasamon.geister.utils.ItemColor;
 
 /**
  * 
@@ -15,6 +21,11 @@ import net.wasamon.geister.utils.Constant;
  *
  */
 public class GameServer {
+    
+    private final File logDir = new File("./log");
+    
+    private FileOutputStream log;
+    private PrintWriter logWriter;
 
 	public enum STATE {
 		WAIT_FOR_INITIALIZATION, WAIT_FOR_PLAYER_0, WAIT_FOR_PLAYER_1, GAME_END
@@ -27,7 +38,9 @@ public class GameServer {
 	private int turn_counter = 0;
 
 	public GameServer() {
-		init();
+	    if(logDir.exists() == false){
+	        logDir.mkdir();
+	    }
 	}
 
 	public int getWinner() {
@@ -38,17 +51,48 @@ public class GameServer {
 		return state;
 	}
 
-	public void init() {
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS");
+    public void init() {
 		this.board = new Board();
 		this.state = STATE.WAIT_FOR_INITIALIZATION;
 		this.winner = -1;
 		init_flags = new boolean[] { false, false };
 		turn_counter = 0;
 	}
+    
+    public void close() {
+        try{
+            if(logWriter != null){
+                logWriter.close();
+            }
+            if(log != null){
+                log.flush();
+                log.close();
+            }
+        }catch(IOException e){
+            throw new RuntimeException(e);
+        }finally {
+            logWriter = null;
+            log = null;
+        }
+    }
 
+    private PrintWriter getLogFile(){
+        if(logWriter != null)
+            return logWriter;
+        String path = "log-" + sdf.format(Calendar.getInstance().getTime()) + ".txt";
+        try{
+            log = new FileOutputStream(new File(logDir, path));
+            logWriter = new PrintWriter(log, true);
+        }catch(IOException e){
+            System.err.println("cannot create log file.");
+            throw new RuntimeException(e);
+        }
+        return logWriter;
+    }
+    
 	private Pattern SET_COMMAND = Pattern.compile("^SET:(\\w*)");
 	private Pattern MOVE_COMMAND = Pattern.compile("^MOV:(\\w*),(\\w*)");
-
 	/**
 	 * Command parse
 	 * 
@@ -60,6 +104,7 @@ public class GameServer {
 	 */
 	public boolean parse(String mesg, int pid) {
 		System.out.println("receive: " + mesg);
+		getLogFile().println("player=" + pid + "," + mesg);
 		boolean flag = false;
 		if (state == STATE.WAIT_FOR_INITIALIZATION) {
 			Matcher m = SET_COMMAND.matcher(mesg);
@@ -88,6 +133,7 @@ public class GameServer {
 						System.out.println("judge: " + judge);
 						if (judge) {
 							state = STATE.GAME_END;
+							getLogFile().println("winner=" + pid);
 						} else {
 							state = state == STATE.WAIT_FOR_PLAYER_0 ? STATE.WAIT_FOR_PLAYER_1
 									: STATE.WAIT_FOR_PLAYER_0;

@@ -221,8 +221,9 @@ public class TCPServer {
 		TCPServer s = new TCPServer(new GameServer(), wait_time);
 		s.webSocketServer.start();
 		while(true){
+            s.server.init();
 			s.start();
-			s.server.init();
+			s.server.close();
 		}
 	}
 
