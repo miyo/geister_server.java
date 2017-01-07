@@ -168,8 +168,11 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
     private final String url_u = "net/wasamon/geister/player/geister_obj.png";
     private final String url_r = "net/wasamon/geister/player/geister_red.png";
     private final String url_b = "net/wasamon/geister/player/geister_blue.png";
+    private final String url_arrow_l = "net/wasamon/geister/player/arrow_l.png";
+    private final String url_arrow_r = "net/wasamon/geister/player/arrow_r.png";
 
     private final BufferedImage img_u, img_r, img_b;
+    private final BufferedImage img_arrow_l, img_arrow_r;
 
     public Canvas(HumanGUIPlayer player) {
         this.player = player;
@@ -182,6 +185,8 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
             img_u = ImageIO.read(getClass().getClassLoader().getResourceAsStream(url_u));
             img_r = ImageIO.read(getClass().getClassLoader().getResourceAsStream(url_r));
             img_b = ImageIO.read(getClass().getClassLoader().getResourceAsStream(url_b));
+            img_arrow_l = ImageIO.read(getClass().getClassLoader().getResourceAsStream(url_arrow_l));
+            img_arrow_r = ImageIO.read(getClass().getClassLoader().getResourceAsStream(url_arrow_r));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -206,6 +211,10 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
         g.drawString(String.valueOf(player.takenRed), convX(3), convY(7)-dim/2);
         g.drawImage(img_b, convX(4), convY(6), dim, dim, null);
         g.drawString(String.valueOf(player.takenBlue), convX(5), convY(7)-dim/2);
+        g.drawImage(img_arrow_l, convX(0), convY(0), dim, dim, null);
+        g.drawImage(img_arrow_r, convX(5), convY(0), dim, dim, null);
+        g.drawImage(img_arrow_l, convX(0), convY(5), dim, dim, null);
+        g.drawImage(img_arrow_r, convX(5), convY(5), dim, dim, null);
     }
 
     private void paintItems(Graphics2D g) {
