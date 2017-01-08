@@ -91,6 +91,8 @@ public class HumanGUIPlayer extends BasePlayer {
         init(host, Integer.parseInt(port));
         System.out.println(setRedItems(init));
         
+        System.out.println("Waiting for an opposite player...");
+        
         waitBoardInfo();
         printBoard();
 
