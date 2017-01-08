@@ -74,14 +74,13 @@ public class HumanGUIPlayer extends BasePlayer {
                 takenBlue++;
             }
         }
-        if (frame != null)
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    frame.repaint();
-                }
-            });
-
+        printBoard(); // output to stdout
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                frame.repaint();
+            }
+        });
     }
 
     boolean moveFlag = false;
@@ -92,9 +91,8 @@ public class HumanGUIPlayer extends BasePlayer {
         System.out.println(setRedItems(init));
         
         System.out.println("Waiting for an opposite player...");
-        
+        // wait for board information
         waitBoardInfo();
-        printBoard();
 
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -108,17 +106,15 @@ public class HumanGUIPlayer extends BasePlayer {
         GAME_LOOP: while (true) {
             if (isEnded() == true)
                 break GAME_LOOP;
-            System.out.println("move ? (ex. A,N)");
             moveFlag = false; // accept user input
+            // wait for user input
             while (true) {
-                
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
                         frame.setTitle(label + " your turn");
                     }
                 });
-                
                 if (moveFlag)
                     break;
                 try {
@@ -126,9 +122,7 @@ public class HumanGUIPlayer extends BasePlayer {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-                //System.out.println("wait user input...");
             }
-            System.out.println(moveInst);
             
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
@@ -136,10 +130,20 @@ public class HumanGUIPlayer extends BasePlayer {
                     frame.setTitle(label);
                 }
             });
-            
-            System.out.println("move:" + move(moveInst));
+
+            // own move
+            move(moveInst);
+            if(getLastTookColor().equals("R")) takenRed++;
+            if(getLastTookColor().equals("B")) takenBlue++;
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    frame.repaint();
+                }
+            });
+
+            // wait for board information after the opposite turn 
             waitBoardInfo();
-            printBoard();
             updateBoard();
         }
 
@@ -247,8 +251,9 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
         g.setTransform(at);
         for (int i = 0; i < player.enemy.length; i++) {
             P p = player.enemy[i];
-            g.drawImage(img_u, convX(p.x), convY(p.y), dim, dim, null); // to
-                                                                        // rotate
+            if(isOwnOccupied(5-p.x, 5-p.y) == false){
+                g.drawImage(img_u, convX(p.x), convY(p.y), dim, dim, null); // to rotate
+            }
         }
         at.rotate(180 * Math.PI / 180.0, DIM / 2, DIM / 2);
         g.setTransform(at);
@@ -313,10 +318,10 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
     }
 
     private boolean isOwnOccupied(int x, int y) {
-        System.out.println("own check:" + x + "," + y);
+        //System.out.println("own check:" + x + "," + y);
         for (int i = 0; i < player.own.length; i++) {
             if (player.own[i].x == x && player.own[i].y == y) {
-                System.out.println("own occupied:" + i);
+                //System.out.println("own occupied:" + i);
                 return true;
             }
         }
@@ -324,7 +329,7 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
     }
 
     private boolean isEnemyOccupied(int x, int y) {
-        System.out.println("enemy check:" + x + "," + y);
+        //System.out.println("enemy check:" + x + "," + y);
         for (int i = 0; i < player.own.length; i++) {
             if (player.enemy[i].x == x && player.enemy[i].y == y) {
                 System.out.println("enemy occupied:" + i);

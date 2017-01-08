@@ -113,6 +113,7 @@ public class GameServer {
 		System.out.println("receive: " + mesg);
 		getLogFile().println("player=" + pid + "," + mesg);
 		boolean flag = false;
+		lastTakenItem = null;
 		if (state == STATE.WAIT_FOR_INITIALIZATION) {
 			Matcher m = SET_COMMAND.matcher(mesg);
 			if (m.matches() && m.group(1).length() == 4 && init_flags[pid] == false) {

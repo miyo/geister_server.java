@@ -56,10 +56,12 @@ public abstract class BasePlayer {
 	
     private String boardInfo = "";
 	
+    private String lastTookColor = ""; 
+    
     private String recv() throws IOException{
 		String s = "";
 		ByteBuffer bb = ByteBuffer.allocate(2048);
-	
+        lastTookColor = "";
 		do{
 			bb.clear();
 			int len = channel.read(bb);
@@ -82,10 +84,15 @@ public abstract class BasePlayer {
 			boardInfo = s;
 			draw = true;
 		}else if(s.startsWith("OK")){
+		    lastTookColor = s.substring(2, 3);
 		    System.out.println(s);
 		}
 		if(verbose) System.out.println(s);
 		return s;
+    }
+    
+    public String getLastTookColor(){
+        return lastTookColor;
     }
     
     public String waitBoardInfo() throws IOException{
