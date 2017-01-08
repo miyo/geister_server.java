@@ -85,6 +85,10 @@ HumanGUIPlayerを使うとGUIで遊ぶことができます
     java -cp build/libs/geister.jar net.wasamon.geister.player.RandomPlayer localhost 10000 # 1st playerとして
     java -cp bulid/libs/geister.jar net.wasamon.geister.player.HumanGUIPlayer localhost 10001 # 2nd playerとして
 
+![クライアントサンプル](./misc/ui_screenshot.png)
+
+ドラッグアンドドロップでコマを動かして遊べます．
+
 ### 対戦の様子を観戦する
 WebSocketで対戦中の盤情報が配信されます．
 
