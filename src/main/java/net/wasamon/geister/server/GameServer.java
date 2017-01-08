@@ -91,6 +91,13 @@ public class GameServer {
         return logWriter;
     }
     
+    private Item lastTakenItem;
+    
+    public String getLastTakenItemColor(){
+        if(lastTakenItem == null) return " ";
+        return lastTakenItem.getColor() == ItemColor.RED ? "R" : "B";
+    }
+    
 	private Pattern SET_COMMAND = Pattern.compile("^SET:(\\w*)");
 	private Pattern MOVE_COMMAND = Pattern.compile("^MOV:(\\w*),(\\w*)");
 	/**
@@ -127,6 +134,7 @@ public class GameServer {
 				Direction d = Direction.dir(m.group(2).toUpperCase());
 				if (d != null && 'A' <= k && k <= 'H') {
 					flag = board.getPlayer(pid).move(new Character(k).toString(), d);
+					lastTakenItem = board.getPlayer(pid).getLastTakenItem();
 					if (flag) {
 						turn_counter++;
 						boolean judge = judgement();

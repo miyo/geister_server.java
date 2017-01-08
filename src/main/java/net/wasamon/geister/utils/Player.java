@@ -49,12 +49,16 @@ public class Player {
 			items[ntoi(k)].setColor(c);
 		}
 	}
+	
+	private Item lastTakenItem = null;
 
 	public boolean move(String name, Direction d) {
 		System.out.println("move: " + name);
 		Item item = items[ntoi(name)];
 		if (items != null) {
-			return item.move(d);
+		    boolean f = item.move(d);
+		    lastTakenItem = item.lastTakenItem;
+		    return f;
 		} else {
 			return false;
 		}
@@ -63,6 +67,10 @@ public class Player {
 	public Item[] getItems() {
 		return items;
 	}
+	
+    public Item getLastTakenItem(){
+        return lastTakenItem; 
+    }
 
 	public Item[] getTakenItems() {
 		ArrayList<Item> items = new ArrayList<>();

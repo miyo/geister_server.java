@@ -68,6 +68,8 @@ public class Item {
 		}
 		return flag;
 	}
+	
+	public Item lastTakenItem = null;
 
 	/**
 	 * 
@@ -105,12 +107,14 @@ public class Item {
 		}
 
 		Item item = player.getBoard().getItem(player, nx, ny);
+        lastTakenItem = null;
 		if (item != null) {
 			if (item.getPlayer() == player) {
 				System.out.println("[ERROR] has been occupied: " + x + "," + y + " -> " + nx + "," + ny);
 				return false;
 			} else {
 				item.setTaken();
+				lastTakenItem = item;
 			}
 		}
 		System.out.println("[SUCCESS]: " + x + "," + y + " -> " + nx + "," + ny);

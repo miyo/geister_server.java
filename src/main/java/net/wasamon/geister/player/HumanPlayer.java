@@ -17,14 +17,14 @@ public class HumanPlayer extends BasePlayer {
         p.init(args[0], Integer.parseInt(args[1]));
         System.out.println("red ghosts? (ex. BCDE)");
         System.out.println(p.setRedItems(p.readLine()));
-        p.printBoard();
-
+        
         GAME_LOOP: while (true) {
+            p.waitBoardInfo();
+            p.printBoard();
             if (p.isEnded() == true)
                 break GAME_LOOP;
             System.out.println("move ? (ex. A,N)");
             System.out.println(p.move(p.readLine()));
-            p.printBoard();
         }
         if (p.isWinner()) {
             System.out.println("won");

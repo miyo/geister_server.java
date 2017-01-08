@@ -87,13 +87,11 @@ public class HumanGUIPlayer extends BasePlayer {
     boolean moveFlag = false;
     String moveInst = "";
 
-    public void start(String host, String port, String init) {
-        try {
-            init(host, Integer.parseInt(port));
-            System.out.println(setRedItems(init));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public void start(String host, String port, String init) throws IOException{
+        init(host, Integer.parseInt(port));
+        System.out.println(setRedItems(init));
+        
+        waitBoardInfo();
         printBoard();
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -137,12 +135,9 @@ public class HumanGUIPlayer extends BasePlayer {
                 }
             });
             
-            try {
-                System.out.println(move(moveInst));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            System.out.println("move:" + move(moveInst));
             moveFlag = false;
+            waitBoardInfo();
             printBoard();
             updateBoard();
         }

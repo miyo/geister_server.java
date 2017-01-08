@@ -81,9 +81,21 @@ public abstract class BasePlayer {
 		}else if(s.startsWith("DRW")){
 			boardInfo = s;
 			draw = true;
+		}else if(s.startsWith("OK")){
+		    System.out.println(s);
 		}
 		if(verbose) System.out.println(s);
 		return s;
+    }
+    
+    public String waitBoardInfo() throws IOException{
+        while(true){
+            String s = recv();
+            //System.out.println("waitBoardInfo:" + s);
+            if(s.startsWith("MOV?") || s.startsWith("WON") || s.startsWith("LST")){
+                return s;
+            }
+        }
     }
 
     private void send(String msg) throws IOException{

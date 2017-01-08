@@ -67,6 +67,7 @@ public class TCPServer {
 
 	private boolean action(SocketChannel chan, String str, int pid) throws IOException {
 		boolean result = true;
+		String lastTakenItemColor = "";
 
 		while (true) {
 			int i = str.indexOf("\r\n");
@@ -75,12 +76,14 @@ public class TCPServer {
 			String cmd = str.substring(0, i);
 			str = str.substring(i + 2);
 			result = server.parse(cmd, pid);
+			lastTakenItemColor = server.getLastTakenItemColor();
 			server.pp();
 		}
 		restMesg[pid] = str;
 		
 		String stateLabel = "MOV:";
 		if (result) {
+		    send(chan, String.format("OK%s\r\n", lastTakenItemColor));
 			if (server.getState() == GameServer.STATE.WAIT_FOR_PLAYER_0) {
 				send(playerChannels[0], "MOV?" + server.getEncodedBoard(0) + "\r\n");
 			} else if (server.getState() == GameServer.STATE.WAIT_FOR_PLAYER_1) {
@@ -99,7 +102,7 @@ public class TCPServer {
 				}
 			}
 		} else {
-			send(chan, "NG\r\n");
+            send(chan, "NG \r\n");
 		}
 		UIWebSocketServer.setMesg(stateLabel + server.getEncodedBoard(1, true)); // as global viewer mode
 		

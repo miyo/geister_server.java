@@ -8,7 +8,7 @@ public class TestPlayer extends BasePlayer{
 		TestPlayer p = new TestPlayer();
 		p.init(args[0], Integer.parseInt(args[1]));
 		System.out.println(p.setRedItems("BCDE"));
-		p.printBoard();
+		
 		Direction[] dirs = {
 				Direction.NORTH,
 				Direction.NORTH,
@@ -21,11 +21,14 @@ public class TestPlayer extends BasePlayer{
 				Direction.WEST,
 				Direction.WEST,
 		};
+        p.waitBoardInfo();
+        p.printBoard();
 		for(Direction d: dirs){
 			Thread.sleep(2);
 			if(p.isEnded() == true) break;
 			System.out.println(p.move("A", d));
-			p.printBoard();
+	        p.waitBoardInfo();
+	        p.printBoard();
 		}
 		if(p.isWinner()){
 			System.out.println("won");
