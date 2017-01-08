@@ -69,16 +69,17 @@ public class TCPServer {
 		boolean result = true;
 		String lastTakenItemColor = "";
 
-		while (true) {
-			int i = str.indexOf("\r\n");
-			if (i == -1)
-				break;
-			String cmd = str.substring(0, i);
-			str = str.substring(i + 2);
-			result = server.parse(cmd, pid);
-			lastTakenItemColor = server.getLastTakenItemColor();
-			server.pp();
+		int i = str.indexOf("\r\n");
+		if (i == -1){
+		    // internal error; str should be a message. 
+		    return false;
 		}
+		String cmd = str.substring(0, i);
+		str = str.substring(i + 2);
+		result = server.parse(cmd, pid);
+		lastTakenItemColor = server.getLastTakenItemColor();
+		server.pp();
+		
 		restMesg[pid] = str;
 		
 		String stateLabel = "MOV:";

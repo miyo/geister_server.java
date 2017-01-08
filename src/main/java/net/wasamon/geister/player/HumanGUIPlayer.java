@@ -103,11 +103,11 @@ public class HumanGUIPlayer extends BasePlayer {
 
         updateBoard();
 
-        moveFlag = false;
         GAME_LOOP: while (true) {
             if (isEnded() == true)
                 break GAME_LOOP;
             System.out.println("move ? (ex. A,N)");
+            moveFlag = false; // accept user input
             while (true) {
                 
                 SwingUtilities.invokeLater(new Runnable() {
@@ -136,7 +136,6 @@ public class HumanGUIPlayer extends BasePlayer {
             });
             
             System.out.println("move:" + move(moveInst));
-            moveFlag = false;
             waitBoardInfo();
             printBoard();
             updateBoard();
