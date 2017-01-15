@@ -80,7 +80,7 @@ HumanPlayerを使うと標準入力から手を入力できます．
     java -cp bulid/libs/geister.jar net.wasamon.geister.player.HumanPlayer localhost 10001 # 2nd playerとして
 
 ### テスト用クライアント(3)
-HumanGUIPlayerを使うとGUIで遊ぶことができます．HumanGUIPlayer実行時の第3引数に，赤にセットするコマの名前を与えてください．
+HumanGUIPlayerを使うとGUIで遊ぶことができます．HumanGUIPlayer実行時の第3引数に，赤にセットするコマの名前を与えてください．A〜Hまでの4つから選択してください．
 
     java -cp build/libs/geister.jar net.wasamon.geister.player.RandomPlayer localhost 10000 # 1st playerとして
     java -cp bulid/libs/geister.jar net.wasamon.geister.player.HumanGUIPlayer localhost 10001 ABCD# 2nd playerとして
