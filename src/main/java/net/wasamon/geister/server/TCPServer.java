@@ -51,8 +51,10 @@ public class TCPServer {
 
 	private void closePlayers() throws IOException {
 		for (SocketChannel ch : playerChannels) {
-			if (ch != null)
+			if (ch != null){
+				ch.shutdownOutput();
 				ch.close();
+			}
 		}
 	}
 
@@ -130,9 +132,18 @@ public class TCPServer {
 					}catch(IOException e){ // At least, a connection is disconnected during read.
 						flag = false;
 						if(playerChannels[0] != null && playerChannels[0].isConnected()){
-							send(playerChannels[0], "WON:" + server.getEncodedBoard(0) + "\r\n");
-						}else if(playerChannels[1] != null && playerChannels[1].isConnected()){
-							send(playerChannels[1], "WON:" + server.getEncodedBoard(0) + "\r\n");
+							try{ // client[0] can catche means that client[0] won
+								send(playerChannels[0], "WON:" + server.getEncodedBoard(0) + "\r\n");
+							}catch(IOException ee){
+								System.out.println("send error, connection [0] is not lived.");
+							}
+						}
+						if(playerChannels[1] != null && playerChannels[1].isConnected()){
+							try{ // client[1] can catche means that client[1] won
+								send(playerChannels[1], "WON:" + server.getEncodedBoard(1) + "\r\n");
+							}catch(IOException ee){
+								System.out.println("send error, connection [1] is not lived.");
+							}
 						}
 					}
 					if(flag == false){ // not should be continued.
@@ -211,7 +222,9 @@ public class TCPServer {
 
 	private void doIrregularJudgement(int loser) throws IOException {
 		int winner = loser == 0 ? 1 : 0;
+		System.out.println("Connection closed by " + loser);
 		if (playerChannels[winner] != null) {
+			System.out.println("send a message for winner [" + winner + "]");
 			send(playerChannels[winner], "WON:" + server.getEncodedBoard(winner) + "\r\n");
 		}
 	}
