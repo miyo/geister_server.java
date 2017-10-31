@@ -178,37 +178,40 @@ public class TCPServerWithBlock {
 			restMesg = str;
 		
 			String stateLabel = "MOV:";
+			
 			if (result) {
 				System.out.println("send: OK");
 				send(chan, String.format("OK%s\r\n", lastTakenItemColor));
-				if (game.getState() == GameServer.STATE.WAIT_FOR_PLAYER_0) {
-					System.out.println("MOV?" + game.getEncodedBoard(0));
-					send(players[0].ch, "MOV?" + game.getEncodedBoard(0) + "\r\n");
-				} else if (game.getState() == GameServer.STATE.WAIT_FOR_PLAYER_1) {
-					System.out.println("MOV?" + game.getEncodedBoard(1));
-					send(players[1].ch, "MOV?" + game.getEncodedBoard(1) + "\r\n");
-				} else if (game.getState() == GameServer.STATE.GAME_END) {
-					int winner = game.getWinner();
-					System.out.println("game end: winner=" + winner);
-					if (winner == Constant.DRAW_MARK) {
-						System.out.println("DRW:" + game.getEncodedBoard(0));
-						send(players[0].ch, "DRW:" + game.getEncodedBoard(0) + "\r\n");
-						System.out.println("DRW:" + game.getEncodedBoard(1));
-						send(players[1].ch, "DRW:" + game.getEncodedBoard(1) + "\r\n");
-						stateLabel = "DRW:";
-					} else {
-						int loser = winner == 0 ? 1 : 0;
-						System.out.println("WON:" + game.getEncodedBoard(winner));
-						send(players[winner].ch, "WON:" + game.getEncodedBoard(winner) + "\r\n");
-						System.out.println("LST:" + game.getEncodedBoard(loser));
-						send(players[loser].ch, "LST:" + game.getEncodedBoard(loser) + "\r\n");
-						stateLabel = winner == 0 ? "WI0:" : "WI1:";
-					}
-				} else{
-					System.out.println("unknown:" + game.getState());
-				}
-			} else {
+			}else{
+				System.out.println("send: NG");
 				send(chan, "NG \r\n");
+			}
+			
+			if (result && game.getState() == GameServer.STATE.WAIT_FOR_PLAYER_0) {
+				System.out.println("MOV?" + game.getEncodedBoard(0));
+				send(players[0].ch, "MOV?" + game.getEncodedBoard(0) + "\r\n");
+			}
+			if (result && game.getState() == GameServer.STATE.WAIT_FOR_PLAYER_1) {
+				System.out.println("MOV?" + game.getEncodedBoard(1));
+				send(players[1].ch, "MOV?" + game.getEncodedBoard(1) + "\r\n");
+			}
+			if (game.getState() == GameServer.STATE.GAME_END) {
+				int winner = game.getWinner();
+				System.out.println("game end: winner=" + winner);
+				if (winner == Constant.DRAW_MARK) {
+					System.out.println("DRW:" + game.getEncodedBoard(0));
+					send(players[0].ch, "DRW:" + game.getEncodedBoard(0) + "\r\n");
+					System.out.println("DRW:" + game.getEncodedBoard(1));
+					send(players[1].ch, "DRW:" + game.getEncodedBoard(1) + "\r\n");
+					stateLabel = "DRW:";
+				} else {
+					int loser = winner == 0 ? 1 : 0;
+					System.out.println("WON:" + game.getEncodedBoard(winner));
+					send(players[winner].ch, "WON:" + game.getEncodedBoard(winner) + "\r\n");
+					System.out.println("LST:" + game.getEncodedBoard(loser));
+					send(players[loser].ch, "LST:" + game.getEncodedBoard(loser) + "\r\n");
+					stateLabel = winner == 0 ? "WI0:" : "WI1:";
+				}
 			}
 			UIWebSocketServer.setMesg(stateLabel + game.getEncodedBoard(1, true)); // as global viewer mode
 		
@@ -233,8 +236,9 @@ public class TCPServerWithBlock {
 
 	public static void main(String[] args) throws Exception {
 		System.out.println("TCPSrverWithBlock");
-		GetOpt opt = new GetOpt("", "wait:", args);
-		TCPServerWithBlock s = new TCPServerWithBlock(new GameServer());
+		GetOpt opt = new GetOpt("", "no_ng_terminate", args);
+		boolean ng_terminate = !opt.flag("no_ng_terminate");
+		TCPServerWithBlock s = new TCPServerWithBlock(new GameServer(ng_terminate));
 		s.webSocketServer.start();
 		while(true){
             s.server.init();

@@ -23,6 +23,7 @@ import net.wasamon.geister.utils.ItemColor;
 public class GameServer {
     
     private final File logDir = new File("./log");
+	private final boolean NG_TERMINATE;
     
     private FileOutputStream log;
     private PrintWriter logWriter;
@@ -37,7 +38,9 @@ public class GameServer {
 	private boolean[] init_flags;
 	private int turn_counter = 0;
 
-	public GameServer() {
+	public GameServer(boolean ng_terminate) {
+		this.NG_TERMINATE = ng_terminate;
+		System.out.println("NG_TERMIATE=" + NG_TERMINATE);
 	    if(logDir.exists() == false){
 	        logDir.mkdir();
 	    }
@@ -147,14 +150,27 @@ public class GameServer {
 							state = state == STATE.WAIT_FOR_PLAYER_0 ? STATE.WAIT_FOR_PLAYER_1
 									: STATE.WAIT_FOR_PLAYER_0;
 						}
+					}else{
+						if(NG_TERMINATE){
+							winner = state == STATE.WAIT_FOR_PLAYER_0 ? 1 : 0;
+							state = STATE.GAME_END;
+						}
 					}
 				} else {
 					System.out.println("Invalid arguments: dir=" + d + ", key=" + k);
 					flag = false;
+					if(NG_TERMINATE){
+						winner = state == STATE.WAIT_FOR_PLAYER_0 ? 1 : 0;
+						state = STATE.GAME_END;
+					}
 				}
 			} else {
 				System.out.println("expected MOVE command, but " + mesg);
 				flag = false;
+				if(NG_TERMINATE){
+					winner = state == STATE.WAIT_FOR_PLAYER_0 ? 1 : 0;
+					state = STATE.GAME_END;
+				}
 			}
 		} else {
 			flag = false;
