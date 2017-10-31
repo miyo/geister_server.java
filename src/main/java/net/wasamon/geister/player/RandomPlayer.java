@@ -12,7 +12,8 @@ public class RandomPlayer extends BasePlayer {
         System.out.println(p.setRedItems("BCDE"));
         Random r = new Random(Calendar.getInstance().getTimeInMillis());
         Direction[] dirs = new Direction[] { Direction.NORTH, Direction.EAST, Direction.WEST, Direction.SOUTH };
-
+		int cnt = 0;
+		
         GAME_LOOP: while (true) {
             p.waitBoardInfo();
             p.printBoard();
@@ -28,6 +29,7 @@ public class RandomPlayer extends BasePlayer {
                     break MY_TURN;
                 }
             }
+			System.out.println(cnt++);
         }
         if (p.isWinner()) {
             System.out.println("won");

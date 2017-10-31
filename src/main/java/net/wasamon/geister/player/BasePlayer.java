@@ -57,20 +57,24 @@ public abstract class BasePlayer {
     private String boardInfo = "";
 	
     private String lastTookColor = ""; 
-    
+
+	String restMesg = "";
     private String recv() throws IOException{
-		String s = "";
 		ByteBuffer bb = ByteBuffer.allocate(2048);
         lastTookColor = "";
-		do{
+		while(!(restMesg.indexOf("\r\n") > 0)){
 			bb.clear();
 			int len = channel.read(bb);
 			if(len == -1){
 				throw new RuntimeException("channel is not opend");
 			}
 			bb.flip();
-			s += Charset.defaultCharset().decode(bb).toString();
-		}while(!s.endsWith("\r\n"));
+			restMesg += Charset.defaultCharset().decode(bb).toString();
+		}
+		
+		int i = restMesg.indexOf("\r\n");
+		String s = restMesg.substring(0, i);
+		restMesg = restMesg.substring(i + 2);
 	       
 		if(s.startsWith("MOV?")){
 			boardInfo = s;
@@ -88,6 +92,7 @@ public abstract class BasePlayer {
 		    System.out.println(s);
 		}
 		if(verbose) System.out.println(s);
+		System.out.println("rest:" + restMesg);
 		return s;
     }
     

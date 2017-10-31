@@ -169,11 +169,13 @@ public class TCPServer {
 		if (server == serverChannels[0] && playerChannels[0] == null) {
 			System.out.println("1st Payer:" + c.socket().getRemoteSocketAddress());
 			playerChannels[0] = c;
-			c.write(ByteBuffer.wrap("SET?\r\n".getBytes()));
+			//c.write(ByteBuffer.wrap("SET?\r\n".getBytes()));
+			send(c, "SET?\r\n");
 		} else if (server == serverChannels[1] && playerChannels[1] == null) {
 			System.out.println("2nd Payer:" + c.socket().getRemoteSocketAddress());
 			playerChannels[1] = c;
-			c.write(ByteBuffer.wrap("SET?\r\n".getBytes()));
+			//c.write(ByteBuffer.wrap("SET?\r\n".getBytes()));
+			send(c, "SET?\r\n");
 		} else {
 			c.close();
 		}
