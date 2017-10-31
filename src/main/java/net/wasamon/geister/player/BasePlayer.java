@@ -66,7 +66,7 @@ public abstract class BasePlayer {
 			bb.clear();
 			int len = channel.read(bb);
 			if(len == -1){
-				throw new RuntimeException("channel is not opend");
+				throw new RuntimeException("channel is not opend.");
 			}
 			bb.flip();
 			restMesg += Charset.defaultCharset().decode(bb).toString();
@@ -76,6 +76,7 @@ public abstract class BasePlayer {
 		String s = restMesg.substring(0, i);
 		restMesg = restMesg.substring(i + 2);
 	       
+		System.out.println(s);
 		if(s.startsWith("MOV?")){
 			boardInfo = s;
 		}else if(s.startsWith("WON")){
@@ -89,7 +90,6 @@ public abstract class BasePlayer {
 			draw = true;
 		}else if(s.startsWith("OK")){
 		    lastTookColor = s.substring(2, 3);
-		    System.out.println(s);
 		}
 		if(verbose) System.out.println(s);
 		System.out.println("rest:" + restMesg);
@@ -104,7 +104,7 @@ public abstract class BasePlayer {
         while(true){
             String s = recv();
             //System.out.println("waitBoardInfo:" + s);
-            if(s.startsWith("MOV?") || s.startsWith("WON") || s.startsWith("LST")){
+            if(s.startsWith("MOV?") || s.startsWith("WON") || s.startsWith("LST") || s.startsWith("DRW")){
                 return s;
             }
         }

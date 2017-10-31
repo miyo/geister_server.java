@@ -17,6 +17,6 @@ dependencies {
 jar.baseName = 'geister'
 
 jar {
-  manifest.attributes 'Main-Class': 'net.wasamon.geister.server.TCPServer'
+  manifest.attributes 'Main-Class': 'net.wasamon.geister.server.TCPServerWithBlock'
   from configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) }
 }

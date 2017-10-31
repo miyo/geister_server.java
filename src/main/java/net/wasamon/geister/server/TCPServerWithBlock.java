@@ -23,13 +23,10 @@ public class TCPServerWithBlock {
 
 	private ServerThread[] players = new ServerThread[2];
 	
-	private final int wait_time;
-
 	private Object lock = new Object();
 
-	public TCPServerWithBlock(GameServer server, int wait_time){
+	public TCPServerWithBlock(GameServer server){
 		this.server = server;
-		this.wait_time = wait_time;
 	}
 
 	public void start() throws IOException{
@@ -64,7 +61,7 @@ public class TCPServerWithBlock {
 
 		private void doAccept(ServerSocketChannel server) throws IOException {
 			SocketChannel c = server.accept();
-			c.setOption(StandardSocketOptions.SO_LINGER, 10);
+			c.setOption(StandardSocketOptions.SO_LINGER, 1000);
 			if (this.port == Constant.PLAYER_1st_PORT && ch == null){
 				System.out.println("1st Payer:" + c.socket().getRemoteSocketAddress());
 				ch = c;
@@ -78,7 +75,7 @@ public class TCPServerWithBlock {
 			}
 		}
 
-		private void send(SocketChannel ch, String msg) throws IOException {
+		synchronized private void send(SocketChannel ch, String msg) throws IOException {
 			// should use OP_WRITE and check writable
 			ByteBuffer bb = ByteBuffer.wrap(msg.getBytes());
 			int len = 0;
@@ -99,7 +96,9 @@ public class TCPServerWithBlock {
 			int len = ch.read(bb);
 			if (len < 0) { // channel has been closed
 				System.out.println("connection closed: " + pid);
-				doIrregularJudgement(pid);
+				if(game.getState() != GameServer.STATE.GAME_END){
+					doIrregularJudgement(pid);
+				}
 				return false; // game end
 			}
 			bb.flip();
@@ -148,7 +147,7 @@ public class TCPServerWithBlock {
 					break;
 				}
 			}
-			close();
+			//close();
 		}
 
 		private void close() throws IOException {
@@ -180,23 +179,33 @@ public class TCPServerWithBlock {
 		
 			String stateLabel = "MOV:";
 			if (result) {
+				System.out.println("send: OK");
 				send(chan, String.format("OK%s\r\n", lastTakenItemColor));
 				if (game.getState() == GameServer.STATE.WAIT_FOR_PLAYER_0) {
+					System.out.println("MOV?" + game.getEncodedBoard(0));
 					send(players[0].ch, "MOV?" + game.getEncodedBoard(0) + "\r\n");
 				} else if (game.getState() == GameServer.STATE.WAIT_FOR_PLAYER_1) {
+					System.out.println("MOV?" + game.getEncodedBoard(1));
 					send(players[1].ch, "MOV?" + game.getEncodedBoard(1) + "\r\n");
 				} else if (game.getState() == GameServer.STATE.GAME_END) {
 					int winner = game.getWinner();
+					System.out.println("game end: winner=" + winner);
 					if (winner == Constant.DRAW_MARK) {
+						System.out.println("DRW:" + game.getEncodedBoard(0));
 						send(players[0].ch, "DRW:" + game.getEncodedBoard(0) + "\r\n");
+						System.out.println("DRW:" + game.getEncodedBoard(1));
 						send(players[1].ch, "DRW:" + game.getEncodedBoard(1) + "\r\n");
 						stateLabel = "DRW:";
 					} else {
 						int loser = winner == 0 ? 1 : 0;
+						System.out.println("WON:" + game.getEncodedBoard(winner));
 						send(players[winner].ch, "WON:" + game.getEncodedBoard(winner) + "\r\n");
+						System.out.println("LST:" + game.getEncodedBoard(loser));
 						send(players[loser].ch, "LST:" + game.getEncodedBoard(loser) + "\r\n");
 						stateLabel = winner == 0 ? "WI0:" : "WI1:";
 					}
+				} else{
+					System.out.println("unknown:" + game.getState());
 				}
 			} else {
 				send(chan, "NG \r\n");
@@ -216,19 +225,21 @@ public class TCPServerWithBlock {
 		}
 		
 	}
+	
+	private void close() throws IOException {
+		players[0].close();
+		players[1].close();
+	}
 
 	public static void main(String[] args) throws Exception {
 		System.out.println("TCPSrverWithBlock");
 		GetOpt opt = new GetOpt("", "wait:", args);
-		int wait_time = 100;
-		if(opt.flag("wait")){
-			wait_time = Integer.parseInt(opt.getValue("wait"));
-		}
-		TCPServerWithBlock s = new TCPServerWithBlock(new GameServer(), wait_time);
+		TCPServerWithBlock s = new TCPServerWithBlock(new GameServer());
 		s.webSocketServer.start();
 		while(true){
             s.server.init();
 			s.start();
+			s.close();
 			s.server.close();
 		}
 	}
