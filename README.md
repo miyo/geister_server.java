@@ -63,6 +63,8 @@ Geister用のゲームサーバ．
 ### サーバー
     java -jar build/libs/geister.jar
 
+でサーバーが起動します．
+
     java -jar build/libs/geister.jar --timeout=5 --budget=200
 
 とすると，持ち時間200秒，タイムアウト5秒などと設定できます．
