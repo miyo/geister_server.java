@@ -10,6 +10,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.util.Iterator;
+import java.util.Calendar;
 
 import org.glassfish.tyrus.server.Server;
 
@@ -27,8 +28,11 @@ public class TCPServerWithBlock {
 
 	private int waitTime = 10;
 
-	public TCPServerWithBlock(GameServer server){
+	private final int budget;
+
+	public TCPServerWithBlock(GameServer server, int budget){
 		this.server = server;
+		this.budget = budget;
 	}
 
 	public void setWaitTime(int v){
@@ -40,8 +44,8 @@ public class TCPServerWithBlock {
 	}
 
 	public void start() throws IOException{
-		players[0] = new ServerThread(server, Constant.PLAYER_1st_PORT);
-		players[1] = new ServerThread(server, Constant.PLAYER_2nd_PORT);
+		players[0] = new ServerThread(server, Constant.PLAYER_1st_PORT, budget);
+		players[1] = new ServerThread(server, Constant.PLAYER_2nd_PORT, budget);
 		players[0].start();
 		players[1].start();
 		try{
@@ -60,8 +64,10 @@ public class TCPServerWithBlock {
 		final ServerSocketChannel server;
 		SocketChannel ch;
 		final GameServer game;
+		int budget;
 		
-		public ServerThread(GameServer game, int port) throws IOException{
+		public ServerThread(GameServer game, int port, int budget) throws IOException{
+			this.budget = budget;
 			this.game = game;
 			this.port = port;
 			this.server = ServerSocketChannel.open();
@@ -174,6 +180,8 @@ public class TCPServerWithBlock {
 			}
 		}
 				
+		long turnStart = -1;
+		
 		private boolean action(SocketChannel chan, String str, int pid) throws IOException {
 			boolean result = true;
 			String lastTakenItemColor = "";
@@ -194,7 +202,11 @@ public class TCPServerWithBlock {
 			String stateLabel = "MOV:";
 			
 			if (result) {
-				System.out.println("send: OK");
+				System.out.println("pid["+pid+"]send: OK");
+				if(turnStart > 0){
+					this.budget -= (Calendar.getInstance().getTimeInMillis() - turnStart) / 1000;
+				}
+				System.out.println("pid["+pid+"]Budget: " + this.budget);
 				send(chan, String.format("OK%s\r\n", lastTakenItemColor));
 				if(timer != null){
 					timer.terminate();
@@ -207,13 +219,17 @@ public class TCPServerWithBlock {
 			if (result && game.getState() == GameServer.STATE.WAIT_FOR_PLAYER_0) {
 				System.out.println("MOV?" + game.getEncodedBoard(0));
 				send(players[0].ch, "MOV?" + game.getEncodedBoard(0) + "\r\n");
-				timer = new PlayerTimer(game, players, waitTime, 0);
+				players[0].turnStart = Calendar.getInstance().getTimeInMillis();
+				int w = players[0].budget <= 0 ? waitTime : players[0].budget + waitTime;
+				timer = new PlayerTimer(game, players, w, 0);
 				timer.start();
 			}
 			if (result && game.getState() == GameServer.STATE.WAIT_FOR_PLAYER_1) {
 				System.out.println("MOV?" + game.getEncodedBoard(1));
 				send(players[1].ch, "MOV?" + game.getEncodedBoard(1) + "\r\n");
-				timer = new PlayerTimer(game, players, waitTime, 1);
+				players[1].turnStart = Calendar.getInstance().getTimeInMillis();
+				int w = players[1].budget <= 0 ? waitTime : players[1].budget + waitTime;
+				timer = new PlayerTimer(game, players, w, 1);
 				timer.start();
 			}
 			if (game.getState() == GameServer.STATE.GAME_END) {
@@ -315,13 +331,18 @@ public class TCPServerWithBlock {
 
 	public static void main(String[] args) throws Exception {
 		System.out.println("TCPSrverWithBlock");
-		GetOpt opt = new GetOpt("", "no_ng_terminate,timeout:", args);
+		GetOpt opt = new GetOpt("", "no_ng_terminate,timeout:,budget:", args);
 		boolean ng_terminate = !opt.flag("no_ng_terminate");
-		TCPServerWithBlock s = new TCPServerWithBlock(new GameServer(ng_terminate));
+		int budget = 10*60; // 10min.
+		if(opt.flag("budget")){
+			budget = Integer.parseInt(opt.getValue("budget"));
+		}
+		TCPServerWithBlock s = new TCPServerWithBlock(new GameServer(ng_terminate), budget);
 		if(opt.flag("timeout")){
 			s.setWaitTime(Integer.parseInt(opt.getValue("timeout")));
 		}
-		System.out.println("Timeout = " + s.getWaitTime() + " sec.");
+		System.out.println("Budget = " + budget + " sec.");
+		System.out.println("Timeout(after consuming budget) = " + s.getWaitTime() + " sec.");
 		s.webSocketServer.start();
 		while(true){
             s.server.init();
