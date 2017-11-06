@@ -194,11 +194,9 @@ public class TCPServerWithBlock {
 			String stateLabel = "MOV:";
 			
 			if (result) {
-				System.out.println("["+pid+"]"+"send: OK");
+				System.out.println("send: OK");
 				send(chan, String.format("OK%s\r\n", lastTakenItemColor));
-				System.out.println(timer);
 				if(timer != null){
-					System.out.println("timer terminate = " + pid);
 					timer.terminate();
 				}
 			}else{
@@ -317,7 +315,7 @@ public class TCPServerWithBlock {
 
 	public static void main(String[] args) throws Exception {
 		System.out.println("TCPSrverWithBlock");
-		GetOpt opt = new GetOpt("", "no_ng_terminate", args);
+		GetOpt opt = new GetOpt("", "no_ng_terminate,timeout:", args);
 		boolean ng_terminate = !opt.flag("no_ng_terminate");
 		TCPServerWithBlock s = new TCPServerWithBlock(new GameServer(ng_terminate));
 		if(opt.flag("timeout")){
