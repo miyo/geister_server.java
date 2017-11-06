@@ -63,9 +63,16 @@ Geister用のゲームサーバ．
 ### サーバー
     java -jar build/libs/geister.jar
 
-    java -jar build/libs/geister.jar --wait=1000
+    java -jar build/libs/geister.jar --timeout=5 --budget=200
 
-とするとゲーム進行のウェイト時間(手を受理する最低待ち時間)を設定できます．
+とすると，持ち時間200秒，タイムアウト5秒などと設定できます．
+(デフォルトは持ち時間10分，タイムアウト10秒)
+
+    java -jar build/libs/geister.jar --no_ng_terminate
+
+と，--no_ng_terminateを着けて起動すると，不正な手を打った場合の負けを抑止することができます．
+(デフォルトでは不正な手を打つと，即座に負けになります)
+
 
 ### テスト用クライアント
 それぞれ別のターミナルなどで起動する．
