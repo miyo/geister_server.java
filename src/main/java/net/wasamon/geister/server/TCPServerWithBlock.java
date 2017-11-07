@@ -152,11 +152,11 @@ public class TCPServerWithBlock {
 					flag = false;
 					if(port == Constant.PLAYER_1st_PORT){
 						if(players[1] != null && players[1].ch != null && players[1].ch.isConnected()){
-							send(players[1].ch, "WON:" + game.getEncodedBoard(1) + "\r\n");
+							send(players[1].ch, "WON:" + game.getEncodedBoard(1, true) + "\r\n");
 						}
 					}else{
 						if(players[0] != null && players[0].ch != null && players[0].ch.isConnected()){
-							send(players[0].ch, "WON:" + game.getEncodedBoard(0) + "\r\n");
+							send(players[0].ch, "WON:" + game.getEncodedBoard(0, true) + "\r\n");
 						}
 					}
 				}
@@ -236,17 +236,17 @@ public class TCPServerWithBlock {
 				int winner = game.getWinner();
 				System.out.println("game end: winner=" + winner);
 				if (winner == Constant.DRAW_MARK) {
-					System.out.println("DRW:" + game.getEncodedBoard(0));
-					send(players[0].ch, "DRW:" + game.getEncodedBoard(0) + "\r\n");
-					System.out.println("DRW:" + game.getEncodedBoard(1));
-					send(players[1].ch, "DRW:" + game.getEncodedBoard(1) + "\r\n");
+					System.out.println("DRW:" + game.getEncodedBoard(0, true));
+					send(players[0].ch, "DRW:" + game.getEncodedBoard(0, true) + "\r\n");
+					System.out.println("DRW:" + game.getEncodedBoard(1, true));
+					send(players[1].ch, "DRW:" + game.getEncodedBoard(1, true) + "\r\n");
 					stateLabel = "DRW:";
 				} else {
 					int loser = winner == 0 ? 1 : 0;
-					System.out.println("WON:" + game.getEncodedBoard(winner));
-					send(players[winner].ch, "WON:" + game.getEncodedBoard(winner) + "\r\n");
-					System.out.println("LST:" + game.getEncodedBoard(loser));
-					send(players[loser].ch, "LST:" + game.getEncodedBoard(loser) + "\r\n");
+					System.out.println("WON:" + game.getEncodedBoard(winner, true));
+					send(players[winner].ch, "WON:" + game.getEncodedBoard(winner, true) + "\r\n");
+					System.out.println("LST:" + game.getEncodedBoard(loser, true));
+					send(players[loser].ch, "LST:" + game.getEncodedBoard(loser, true) + "\r\n");
 					stateLabel = winner == 0 ? "WI0:" : "WI1:";
 				}
 			}
@@ -260,7 +260,7 @@ public class TCPServerWithBlock {
 			System.out.println("Connection closed by " + loser);
 			if (players[winner].ch != null) {
 				System.out.println("send a message for winner [" + winner + "]");
-				send(players[winner].ch, "WON:" + game.getEncodedBoard(winner) + "\r\n");
+				send(players[winner].ch, "WON:" + game.getEncodedBoard(winner, true) + "\r\n");
 			}
 		}
 
@@ -310,10 +310,10 @@ public class TCPServerWithBlock {
 				int winner = player == 0 ? 1 : 0;
 				System.out.println("Timeout: winner=" + winner + ", loser=" + loser);
 				try{
-					System.out.println("WON:" + game.getEncodedBoard(winner));
-					players[winner].send(players[winner].ch, "WON:" + game.getEncodedBoard(winner) + "\r\n");
-					System.out.println("LST:" + game.getEncodedBoard(loser));
-					players[loser].send(players[loser].ch, "LST:" + game.getEncodedBoard(loser) + "\r\n");
+					System.out.println("WON:" + game.getEncodedBoard(winner, true));
+					players[winner].send(players[winner].ch, "WON:" + game.getEncodedBoard(winner, true) + "\r\n");
+					System.out.println("LST:" + game.getEncodedBoard(loser, true));
+					players[loser].send(players[loser].ch, "LST:" + game.getEncodedBoard(loser, true) + "\r\n");
 					players[0].close(); // force stop
 					players[1].close(); // force stop
 				}catch(IOException e){

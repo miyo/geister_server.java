@@ -298,7 +298,8 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
         for (int i = 0; i < player.enemy.length; i++) {
             P p = player.enemy[i];
             if(isOwnOccupied(5-p.x, 5-p.y) == false){
-                g.drawImage(img_u, convX(p.x), convY(p.y), dim, dim, null); // to rotate
+				BufferedImage img = p.c == ItemColor.RED ? img_r : p.c == ItemColor.BLUE ? img_b : img_u;
+                g.drawImage(img, convX(p.x), convY(p.y), dim, dim, null); // to rotate
             }
         }
         at.rotate(180 * Math.PI / 180.0, DIM / 2, DIM / 2);

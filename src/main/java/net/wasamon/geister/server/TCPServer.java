@@ -94,13 +94,13 @@ public class TCPServer {
 			} else if (server.getState() == GameServer.STATE.GAME_END) {
 				int winner = server.getWinner();
 				if (winner == Constant.DRAW_MARK) {
-					send(playerChannels[0], "DRW:" + server.getEncodedBoard(0) + "\r\n");
-					send(playerChannels[1], "DRW:" + server.getEncodedBoard(1) + "\r\n");
+					send(playerChannels[0], "DRW:" + server.getEncodedBoard(0, true) + "\r\n");
+					send(playerChannels[1], "DRW:" + server.getEncodedBoard(1, true) + "\r\n");
 					stateLabel = "DRW:";
 				} else {
 					int loser = winner == 0 ? 1 : 0;
-					send(playerChannels[winner], "WON:" + server.getEncodedBoard(winner) + "\r\n");
-					send(playerChannels[loser], "LST:" + server.getEncodedBoard(loser) + "\r\n");
+					send(playerChannels[winner], "WON:" + server.getEncodedBoard(winner, true) + "\r\n");
+					send(playerChannels[loser], "LST:" + server.getEncodedBoard(loser, true) + "\r\n");
 					stateLabel = winner == 0 ? "WI0:" : "WI1:";
 				}
 			}
@@ -133,14 +133,14 @@ public class TCPServer {
 						flag = false;
 						if(playerChannels[0] != null && playerChannels[0].isConnected()){
 							try{ // client[0] can catche means that client[0] won
-								send(playerChannels[0], "WON:" + server.getEncodedBoard(0) + "\r\n");
+								send(playerChannels[0], "WON:" + server.getEncodedBoard(0, true) + "\r\n");
 							}catch(IOException ee){
 								System.out.println("send error, connection [0] is not lived.");
 							}
 						}
 						if(playerChannels[1] != null && playerChannels[1].isConnected()){
 							try{ // client[1] can catche means that client[1] won
-								send(playerChannels[1], "WON:" + server.getEncodedBoard(1) + "\r\n");
+								send(playerChannels[1], "WON:" + server.getEncodedBoard(1, true) + "\r\n");
 							}catch(IOException ee){
 								System.out.println("send error, connection [1] is not lived.");
 							}
@@ -227,7 +227,7 @@ public class TCPServer {
 		System.out.println("Connection closed by " + loser);
 		if (playerChannels[winner] != null) {
 			System.out.println("send a message for winner [" + winner + "]");
-			send(playerChannels[winner], "WON:" + server.getEncodedBoard(winner) + "\r\n");
+			send(playerChannels[winner], "WON:" + server.getEncodedBoard(winner, true) + "\r\n");
 		}
 	}
 
