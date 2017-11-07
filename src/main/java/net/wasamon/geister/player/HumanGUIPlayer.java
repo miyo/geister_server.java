@@ -114,6 +114,8 @@ public class HumanGUIPlayer extends BasePlayer {
     boolean moveFlag = false;
     String moveInst = "";
 
+	boolean turnFlag = false;
+
     public void start(String host, String port, String init) throws IOException{
         init(host, Integer.parseInt(port));
         System.out.println(setRedItems(init));
@@ -139,6 +141,7 @@ public class HumanGUIPlayer extends BasePlayer {
             moveFlag = false; // accept user input
             // wait for user input
             while (true) {
+				turnFlag = true;
                 SwingUtilities.invokeLater(new Runnable() {
 						@Override
 						public void run() {
@@ -171,7 +174,7 @@ public class HumanGUIPlayer extends BasePlayer {
 						frame.repaint();
 					}
 				});
-
+			turnFlag = false;
             // wait for board information after the opposite turn 
             String result = waitBoardInfo();
             updateBoard();
@@ -252,11 +255,22 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
     public void paintComponent(Graphics g) {
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, DIM, DIM);
+		paintTurnIndicator(g);
 		paintEscape(g);
 		paintDiffItem((Graphics2D)g);
         paintBoarder(g);
         paintItems((Graphics2D) g);
     }
+
+	private void paintTurnIndicator(Graphics g){
+		g.setColor(Color.RED);
+		if(player.turnFlag){
+			g.fillRect(0, DIM-10, DIM, 10);
+		}else{
+			g.fillRect(0, 0, DIM, 10);
+		}
+        g.setColor(Color.WHITE);
+	}
 
 	private void paintEscape(Graphics g){
 		g.drawImage(img_arrow_l, convX(0), convY(0), dim, dim, null);
