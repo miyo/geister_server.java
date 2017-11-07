@@ -30,6 +30,9 @@ public class HumanGUIPlayer extends BasePlayer {
     int takenRed = 0;
     int takenBlue = 0;
 
+	boolean[] enemiesFlag;
+	boolean[] enemiesDiffFlag;
+
     public HumanGUIPlayer() {
         for (int x = 0; x < 4; x++) {
             for (int y = 0; y < 2; y++) {
@@ -38,6 +41,10 @@ public class HumanGUIPlayer extends BasePlayer {
                 // enemy[y*4+x] = new P(x+1, y+4);
             }
         }
+		enemiesDiffFlag = new boolean[36];
+		for(int i = 0;i < enemiesDiffFlag.length; i++){
+			enemiesDiffFlag[i] = false;
+		}
     }
 
     private String label = "Geister Human Player -";
@@ -54,16 +61,37 @@ public class HumanGUIPlayer extends BasePlayer {
 
     private void updateBoard() {
         Item[] items;
-        items = getOwnItems();
-        for (int i = 0; i < items.length; i++) {
-            own[i] = new P(items[i].getX(), items[i].getY());
-            own[i].c = items[i].getColor();
-        }
+		boolean[] flags = new boolean[36];
+		for(int i = 0; i < flags.length; i++) flags[i] = false;
+		
         items = getOppositeItems();
         for (int i = 0; i < items.length; i++) {
             enemy[i] = new P(items[i].getX(), items[i].getY());
             enemy[i].c = items[i].getColor();
+			if(items[i].getX() < 6 && items[i].getY() < 6){
+				flags[items[i].getX() + items[i].getY() * 6] = true;
+			}else{ // special case (taken by own-side)
+				
+			}
         }
+		
+		if(enemiesFlag != null){
+			for(int i = 0; i < enemiesFlag.length; i++){
+				enemiesDiffFlag[i] = (enemiesFlag[i] != flags[i]);
+			}
+		}
+		enemiesFlag = flags;
+
+		items = getOwnItems();
+        for (int i = 0; i < items.length; i++) {
+            own[i] = new P(items[i].getX(), items[i].getY());
+            own[i].c = items[i].getColor();
+			if(items[i].getX() < 6 && items[i].getY() < 6){
+				enemiesDiffFlag[6-items[i].getX()-1 + (6-items[i].getY()-1) * 6] = false;
+			}
+        }
+
+		
         items = getOppositeTakenItems();
         takenRed = 0;
         takenBlue = 0;
@@ -76,11 +104,11 @@ public class HumanGUIPlayer extends BasePlayer {
         }
         printBoard(); // output to stdout
         SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                frame.repaint();
-            }
-        });
+				@Override
+				public void run() {
+					frame.repaint();
+				}
+			});
     }
 
     boolean moveFlag = false;
@@ -91,15 +119,17 @@ public class HumanGUIPlayer extends BasePlayer {
         System.out.println(setRedItems(init));
         
         System.out.println("Waiting for an opposite player...");
-        // wait for board information
-        waitBoardInfo();
+
+		String boardStr;
+		// wait for board information
+        boardStr = waitBoardInfo();
 
         SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                makeGUI();
-            }
-        });
+				@Override
+				public void run() {
+					makeGUI();
+				}
+			});
 
         updateBoard();
 
@@ -110,11 +140,11 @@ public class HumanGUIPlayer extends BasePlayer {
             // wait for user input
             while (true) {
                 SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        frame.setTitle(label + " your turn");
-                    }
-                });
+						@Override
+						public void run() {
+							frame.setTitle(label + " your turn");
+						}
+					});
                 if (moveFlag)
                     break;
                 try {
@@ -125,25 +155,25 @@ public class HumanGUIPlayer extends BasePlayer {
             }
             
             SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    frame.setTitle(label);
-                }
-            });
+					@Override
+					public void run() {
+						frame.setTitle(label);
+					}
+				});
 
             // own move
             move(moveInst);
             if(getLastTookColor().equals("R")) takenRed++;
             if(getLastTookColor().equals("B")) takenBlue++;
             SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    frame.repaint();
-                }
-            });
+					@Override
+					public void run() {
+						frame.repaint();
+					}
+				});
 
             // wait for board information after the opposite turn 
-            waitBoardInfo();
+            String result = waitBoardInfo();
             updateBoard();
         }
 
@@ -166,9 +196,9 @@ public class HumanGUIPlayer extends BasePlayer {
         HumanGUIPlayer p = new HumanGUIPlayer();
         if (args.length < 3) {
             System.out.println(
-                    "java -cp build/libs/geister.jar net.wasamon.geister.player.HumanGUIPlayer host 10000/10001 init");
+							   "java -cp build/libs/geister.jar net.wasamon.geister.player.HumanGUIPlayer host 10000/10001 init");
             System.out.println(
-                    "ex. java -cp build/libs/geister.jar net.wasamon.geister.player.HumanGUIPlayer localhost 10000 ABCD");
+							   "ex. java -cp build/libs/geister.jar net.wasamon.geister.player.HumanGUIPlayer localhost 10000 ABCD");
         }
         p.start(args[0], args[1], args[2]);
     }
@@ -222,9 +252,29 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
     public void paintComponent(Graphics g) {
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, DIM, DIM);
+		paintEscape(g);
+		paintDiffItem((Graphics2D)g);
         paintBoarder(g);
         paintItems((Graphics2D) g);
     }
+
+	private void paintEscape(Graphics g){
+		g.drawImage(img_arrow_l, convX(0), convY(0), dim, dim, null);
+		g.drawImage(img_arrow_r, convX(5), convY(0), dim, dim, null);
+		g.drawImage(img_arrow_l, convX(0), convY(5), dim, dim, null);
+		g.drawImage(img_arrow_r, convX(5), convY(5), dim, dim, null);
+	}
+
+	private Color diffColor = new Color(253, 180, 240);
+	private void paintDiffItem(Graphics2D g){
+		for(int i = 0; i < player.enemiesDiffFlag.length; i++){
+			if(player.enemiesDiffFlag[i]){
+				g.setColor(diffColor);
+				g.fillRect(convX(6-i%6-1), convY(6-i/6-1), dim, dim);
+				g.setColor(Color.BLACK);
+			}
+		}
+	}
 
     private Font font = new Font("Arial", Font.BOLD, 36);
 
@@ -239,10 +289,6 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
         g.drawString(String.valueOf(player.takenRed), convX(3), convY(7) - dim / 2);
         g.drawImage(img_b, convX(4), convY(6), dim, dim, null);
         g.drawString(String.valueOf(player.takenBlue), convX(5), convY(7) - dim / 2);
-        g.drawImage(img_arrow_l, convX(0), convY(0), dim, dim, null);
-        g.drawImage(img_arrow_r, convX(5), convY(0), dim, dim, null);
-        g.drawImage(img_arrow_l, convX(0), convY(5), dim, dim, null);
-        g.drawImage(img_arrow_r, convX(5), convY(5), dim, dim, null);
     }
 
     private void paintItems(Graphics2D g) {
@@ -257,7 +303,7 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
         }
         at.rotate(180 * Math.PI / 180.0, DIM / 2, DIM / 2);
         g.setTransform(at);
-        for (int i = 0; i < player.enemy.length; i++) {
+        for (int i = 0; i < player.own.length; i++) {
             if (selected != i) {
                 P p = player.own[i];
                 BufferedImage img = p.c == ItemColor.RED ? img_r : p.c == ItemColor.BLUE ? img_b : img_u;
