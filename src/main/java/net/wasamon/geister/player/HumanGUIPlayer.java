@@ -34,17 +34,19 @@ public class HumanGUIPlayer extends BasePlayer {
 	boolean[] enemiesDiffFlag;
 
     public HumanGUIPlayer() {
+		enemiesDiffFlag = new boolean[36];
+		enemiesFlag = new boolean[36];
+		for(int i = 0;i < enemiesDiffFlag.length; i++){
+			enemiesDiffFlag[i] = false;
+			enemiesFlag[i] = false;
+		}
         for (int x = 0; x < 4; x++) {
             for (int y = 0; y < 2; y++) {
                 own[y * 4 + x] = new P(x + 1, y + 4);
-                enemy[y * 4 + x] = new P(4 - x, 1 - y);
-                // enemy[y*4+x] = new P(x+1, y+4);
+                enemy[y*4+x] = new P(x+1, y+4);
+				enemiesFlag[(y+4)*6+(x+1)] = true;
             }
         }
-		enemiesDiffFlag = new boolean[36];
-		for(int i = 0;i < enemiesDiffFlag.length; i++){
-			enemiesDiffFlag[i] = false;
-		}
     }
 
     private String label = "Geister Human Player -";
@@ -120,18 +122,18 @@ public class HumanGUIPlayer extends BasePlayer {
         init(host, Integer.parseInt(port));
         System.out.println(setRedItems(init));
         
-        System.out.println("Waiting for an opposite player...");
-
-		String boardStr;
-		// wait for board information
-        boardStr = waitBoardInfo();
-
         SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
 					makeGUI();
 				}
 			});
+		
+        System.out.println("Waiting for an opposite player...");
+		
+		String boardStr;
+		// wait for board information
+        boardStr = waitBoardInfo();
 
         updateBoard();
 
@@ -166,6 +168,10 @@ public class HumanGUIPlayer extends BasePlayer {
 
             // own move
             move(moveInst);
+			if (isEnded() == true){ // opposite player has been dead
+                break GAME_LOOP;
+			}
+
             if(getLastTookColor().equals("R")) takenRed++;
             if(getLastTookColor().equals("B")) takenBlue++;
             SwingUtilities.invokeLater(new Runnable() {

@@ -135,6 +135,7 @@ public class TCPServerWithBlock {
 		}
 		
 		public void run(){
+			irregularFlag = false;
 			try{
 				body();
 			}catch(IOException e){
@@ -152,11 +153,19 @@ public class TCPServerWithBlock {
 					flag = false;
 					if(port == Constant.PLAYER_1st_PORT){
 						if(players[1] != null && players[1].ch != null && players[1].ch.isConnected()){
-							send(players[1].ch, "WON:" + game.getEncodedBoard(1, true) + "\r\n");
+							try{
+								send(players[1].ch, "WON:" + game.getEncodedBoard(1, true) + "\r\n");
+							}catch(IOException ee){
+								// internal error
+							}
 						}
 					}else{
 						if(players[0] != null && players[0].ch != null && players[0].ch.isConnected()){
-							send(players[0].ch, "WON:" + game.getEncodedBoard(0, true) + "\r\n");
+							try{
+								send(players[0].ch, "WON:" + game.getEncodedBoard(0, true) + "\r\n");
+							}catch(IOException ee){
+								// internal error
+							}
 						}
 					}
 				}
@@ -258,14 +267,17 @@ public class TCPServerWithBlock {
 		private void doIrregularJudgement(int loser) throws IOException {
 			int winner = loser == 0 ? 1 : 0;
 			System.out.println("Connection closed by " + loser);
-			if (players[winner].ch != null) {
-				System.out.println("send a message for winner [" + winner + "]");
+			if (players[winner].ch != null && irregularFlag == false) {
+				irregularFlag = true;
+				System.out.println("send a message for [" + winner + "]");
 				send(players[winner].ch, "WON:" + game.getEncodedBoard(winner, true) + "\r\n");
 			}
 		}
 
 	}
 
+	private boolean irregularFlag = false;
+	
 	class PlayerTimer extends Thread{
 		private final GameServer game;
 		private final ServerThread[] players;
