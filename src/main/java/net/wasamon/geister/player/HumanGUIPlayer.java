@@ -40,11 +40,13 @@ public class HumanGUIPlayer extends BasePlayer {
 			enemiesDiffFlag[i] = false;
 			enemiesFlag[i] = false;
 		}
-        for (int x = 0; x < 4; x++) {
-            for (int y = 0; y < 2; y++) {
-                own[y * 4 + x] = new P(x + 1, y + 4);
-                enemy[y*4+x] = new P(x+1, y+4);
+		int cnt = 0;
+		for (int y = 0; y < 2; y++) {
+			for (int x = 0; x < 4; x++) {
+                own[y * 4 + x] = new P(x + 1, y + 4, cnt);
+                enemy[y*4+x] = new P(x+1, y+4, cnt);
 				enemiesFlag[(y+4)*6+(x+1)] = true;
+				cnt++;
             }
         }
     }
@@ -68,7 +70,7 @@ public class HumanGUIPlayer extends BasePlayer {
 		
         items = getOppositeItems();
         for (int i = 0; i < items.length; i++) {
-            enemy[i] = new P(items[i].getX(), items[i].getY());
+            enemy[i] = new P(items[i].getX(), items[i].getY(), i);
             enemy[i].c = items[i].getColor();
 			if(items[i].getX() < 6 && items[i].getY() < 6){
 				flags[items[i].getX() + items[i].getY() * 6] = true;
@@ -86,7 +88,7 @@ public class HumanGUIPlayer extends BasePlayer {
 
 		items = getOwnItems();
         for (int i = 0; i < items.length; i++) {
-            own[i] = new P(items[i].getX(), items[i].getY());
+            own[i] = new P(items[i].getX(), items[i].getY(), i);
             own[i].c = items[i].getColor();
 			if(items[i].getX() < 6 && items[i].getY() < 6){
 				enemiesDiffFlag[6-items[i].getX()-1 + (6-items[i].getY()-1) * 6] = false;
@@ -217,10 +219,12 @@ public class HumanGUIPlayer extends BasePlayer {
 class P {
     int x, y;
     ItemColor c = ItemColor.UNKNOWN;
+	int id;
 
-    public P(int x, int y) {
+    public P(int x, int y, int id) {
         this.x = x;
         this.y = y;
+		this.id = id;
     }
 }
 
@@ -297,6 +301,7 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
 	}
 
     private Font font = new Font("Arial", Font.BOLD, 36);
+    private Font font2 = new Font("Arial", Font.BOLD, 16);
 
     private void paintBoarder(Graphics g) {
         g.setColor(Color.BLACK);
@@ -311,7 +316,10 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
         g.drawString(String.valueOf(player.takenBlue), convX(5), convY(7) - dim / 2);
     }
 
+	private String[] label = new String[]{"A", "B", "C", "D", "E", "F", "G", "H"};
+	
     private void paintItems(Graphics2D g) {
+        g.setFont(font2);
         final AffineTransform at = new AffineTransform();
         at.rotate(180 * Math.PI / 180.0, DIM / 2, DIM / 2);
         g.setTransform(at);
@@ -320,6 +328,7 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
             if(isOwnOccupied(5-p.x, 5-p.y) == false){
 				BufferedImage img = p.c == ItemColor.RED ? img_r : p.c == ItemColor.BLUE ? img_b : img_u;
                 g.drawImage(img, convX(p.x), convY(p.y), dim, dim, null); // to rotate
+				g.drawString(label[p.id], convX(p.x)+2, convY(p.y)+16);
             }
         }
         at.rotate(180 * Math.PI / 180.0, DIM / 2, DIM / 2);
@@ -329,12 +338,14 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
                 P p = player.own[i];
                 BufferedImage img = p.c == ItemColor.RED ? img_r : p.c == ItemColor.BLUE ? img_b : img_u;
                 g.drawImage(img, convX(p.x), convY(p.y), dim, dim, null);
+				g.drawString(label[p.id], convX(p.x)+2, convY(p.y)+16);
             }
         }
         if (selected != -1) {
             P p = player.own[selected];
             BufferedImage img = p.c == ItemColor.RED ? img_r : p.c == ItemColor.BLUE ? img_b : img_u;
             g.drawImage(img, selectedX, selectedY, dim, dim, null);
+			g.drawString(label[p.id], convX(selectedX)+2, convY(selectedY)+16);
         }
     }
 
@@ -381,7 +392,7 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
     private P conv(int x, int y) {
         int x0 = x - dim >= 0 ? (x - dim) / dim : -1;
         int y0 = y - dim >= 0 ? (y - dim) / dim : -1;
-        return new P(x0, y0);
+        return new P(x0, y0, 0);
     }
 
     private boolean isOwnOccupied(int x, int y) {

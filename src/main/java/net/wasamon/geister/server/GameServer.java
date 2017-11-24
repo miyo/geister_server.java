@@ -145,7 +145,7 @@ public class GameServer {
 						System.out.println("judge: " + judge);
 						if (judge) {
 							state = STATE.GAME_END;
-							getLogFile().println("winner=" + pid);
+							getLogFile().println("winner=" + getWinner());
 						} else {
 							state = state == STATE.WAIT_FOR_PLAYER_0 ? STATE.WAIT_FOR_PLAYER_1
 									: STATE.WAIT_FOR_PLAYER_0;
