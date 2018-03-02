@@ -20,6 +20,7 @@ class CellState
                 @obj = new GeisterObj(GeisterObj.COLOR_NONE, GeisterObj.PLAYER_NONE)
 
 class GameOfGeister
+       
         cellSize: 60
         numberOfRows: 8
         numberOfColumns: 8
@@ -49,6 +50,8 @@ class GameOfGeister
                 @ready_resources()
                 @ws.geister = this
                 @ws.onmessage = (e) -> @geister.update_info(e)
+                @turnPlayer = 1
+                @prevMesg = ""
 
         str2color: (s) ->
                 s = s.toUpperCase()
@@ -58,8 +61,14 @@ class GameOfGeister
 
         update_info: (e) ->
                 msg = e.data
+                console.log(msg)
                 $('#message').text(msg)
                 return if msg.length < 5
+                if @prevMesg != "" and @prevMesg != msg and msg[0..2] == "MV0"
+                        @turnPlayer = 1
+                if @prevMesg != "" and @prevMesg != msg and msg[0..2] == "MV1"
+                        @turnPlayer = -1
+                @prevMesg = msg
                 state = msg[0..2]
                 msg = msg[4..]
                 @currentCell = []
@@ -156,6 +165,7 @@ class GameOfGeister
                         @currentCell[row] = []
                         for column in [0...@numberOfColumns]
                                 @currentCell[row][column] = new CellState(row, column)
+                @turnPlayer = 1
 
         drawImage: (img, x, y, rot) ->
                 if rot
@@ -177,6 +187,12 @@ class GameOfGeister
                 @drawImage(@arrow_img, 1, 6, false)
                 @drawImage(@arrow_img, 6, 6, true)
                 @drawGrid()
+                if @turnPlayer == 1
+                        @drawingContext.fillStyle = "rgb(200, 0, 0)"
+                        @drawingContext.fillRect(0, 0, @drawingContext.canvas.clientWidth, 5)
+                else
+                        @drawingContext.fillStyle = "rgb(0, 0, 200)"
+                        @drawingContext.fillRect(0, @drawingContext.canvas.clientHeight-5, @drawingContext.canvas.clientWidth, 5)
 
         drawGrid: ->
                 for row in [0...@numberOfRows]

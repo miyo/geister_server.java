@@ -232,6 +232,7 @@ public class TCPServerWithBlock {
 				int w = players[0].budget <= 0 ? waitTime : players[0].budget + waitTime;
 				timer = new PlayerTimer(game, players, w, 0);
 				timer.start();
+				stateLabel = "MV0:";
 			}
 			if (result && game.getState() == GameServer.STATE.WAIT_FOR_PLAYER_1) {
 				System.out.println("MOV?" + game.getEncodedBoard(1));
@@ -240,6 +241,7 @@ public class TCPServerWithBlock {
 				int w = players[1].budget <= 0 ? waitTime : players[1].budget + waitTime;
 				timer = new PlayerTimer(game, players, w, 1);
 				timer.start();
+				stateLabel = "MV1:";
 			}
 			if (game.getState() == GameServer.STATE.GAME_END) {
 				int winner = game.getWinner();
