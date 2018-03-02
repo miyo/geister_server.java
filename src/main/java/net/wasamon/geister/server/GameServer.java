@@ -28,6 +28,8 @@ public class GameServer {
     private FileOutputStream log;
     private PrintWriter logWriter;
 
+	private final int max_turn;
+
 	public enum STATE {
 		WAIT_FOR_INITIALIZATION, WAIT_FOR_PLAYER_0, WAIT_FOR_PLAYER_1, GAME_END
 	}
@@ -38,8 +40,9 @@ public class GameServer {
 	private boolean[] init_flags;
 	private int turn_counter = 0;
 
-	public GameServer(boolean ng_terminate) {
+	public GameServer(boolean ng_terminate, int max_turn) {
 		this.NG_TERMINATE = ng_terminate;
+		this.max_turn = max_turn;
 		System.out.println("NG_TERMIATE=" + NG_TERMINATE);
 	    if(logDir.exists() == false){
 	        logDir.mkdir();
@@ -204,7 +207,7 @@ public class GameServer {
 				return true;
 			}
 		}
-		if (turn_counter == Constant.MAX_TURN_COUNT) {
+		if (turn_counter == this.max_turn) {
 			winner = Constant.DRAW_MARK;
 			return true;
 		}

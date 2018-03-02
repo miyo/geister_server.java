@@ -27,7 +27,8 @@ public class TCPServerWithBlock {
 	private Object lock = new Object();
 
 	private int waitTime = 10;
-
+	private static int waitViewerTime = 0;
+	
 	private final int budget;
 
 	public TCPServerWithBlock(GameServer server, int budget){
@@ -224,6 +225,12 @@ public class TCPServerWithBlock {
 				System.out.println("send: NG");
 				send(chan, "NG \r\n");
 			}
+
+			//sleep for view. (without using budget time.) // by kawakami-san
+			try {
+				Thread.sleep(waitViewerTime);
+			} catch (InterruptedException e) {
+			}
 			
 			if (result && game.getState() == GameServer.STATE.WAIT_FOR_PLAYER_0) {
 				System.out.println("MOV?" + game.getEncodedBoard(0));
@@ -345,15 +352,22 @@ public class TCPServerWithBlock {
 
 	public static void main(String[] args) throws Exception {
 		System.out.println("TCPSrverWithBlock");
-		GetOpt opt = new GetOpt("", "no_ng_terminate,timeout:,budget:", args);
+		GetOpt opt = new GetOpt("", "no_ng_terminate,timeout:,budget:,wait:,max-turn:", args);
 		boolean ng_terminate = !opt.flag("no_ng_terminate");
 		int budget = 10*60; // 10min.
 		if(opt.flag("budget")){
 			budget = Integer.parseInt(opt.getValue("budget"));
 		}
-		TCPServerWithBlock s = new TCPServerWithBlock(new GameServer(ng_terminate), budget);
+		int max_turn = Constant.MAX_TURN_COUNT;
+		if(opt.flag("maxturn")){
+			max_turn = Integer.parseInt(opt.getValue("max-turn"));
+		}
+		TCPServerWithBlock s = new TCPServerWithBlock(new GameServer(ng_terminate, max_turn), budget);
 		if(opt.flag("timeout")){
 			s.setWaitTime(Integer.parseInt(opt.getValue("timeout")));
+		}
+		if(opt.flag("wait")){
+			waitViewerTime = Integer.parseInt(opt.getValue("wait"));
 		}
 		System.out.println("Budget = " + budget + " sec.");
 		System.out.println("Timeout(after consuming budget) = " + s.getWaitTime() + " sec.");

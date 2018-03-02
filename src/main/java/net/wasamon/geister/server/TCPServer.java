@@ -237,7 +237,7 @@ public class TCPServer {
 		if(opt.flag("wait")){
 			wait_time = Integer.parseInt(opt.getValue("wait"));
 		}
-		TCPServer s = new TCPServer(new GameServer(false), wait_time);
+		TCPServer s = new TCPServer(new GameServer(false, Constant.MAX_TURN_COUNT), wait_time);
 		s.webSocketServer.start();
 		while(true){
             s.server.init();
