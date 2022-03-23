@@ -11,7 +11,8 @@ Geister用のゲームサーバ．
 - WebSocketで観戦用のグローバルな盤情報をキャストする
 
 ## 動作環境
-- Java 8
+
+- Java 8, Java 11
 
 ## 盤面(仮)
         0 1 2 3 4 5
@@ -59,6 +60,8 @@ Geister用のゲームサーバ．
 ## 実行例
 ### コンパイル
     gradle jar
+
+gradle-6.8.3 を使ってください．7系ではビルドできません．
 
 ### サーバー
     java -jar build/libs/geister.jar
