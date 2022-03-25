@@ -61,7 +61,7 @@ Geister用のゲームサーバ．
 ### コンパイル
     gradle jar
 
-gradle-6.8.3 を使ってください．7系ではビルドできません．
+gradle-6.9.2 でビルドできることを確認しています．7系ではビルドできません．
 
 ### サーバー
     java -jar build/libs/geister.jar
