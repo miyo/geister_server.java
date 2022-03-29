@@ -5,12 +5,17 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Toolkit;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+
+import java.lang.reflect.Field;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -32,6 +37,8 @@ public class HumanGUIPlayer extends BasePlayer {
 
 	boolean[] enemiesFlag;
 	boolean[] enemiesDiffFlag;
+
+	boolean retina = false;
 
     public HumanGUIPlayer() {
 		enemiesDiffFlag = new boolean[36];
@@ -211,6 +218,9 @@ public class HumanGUIPlayer extends BasePlayer {
             System.out.println(
 							   "ex. java -cp build/libs/geister.jar net.wasamon.geister.player.HumanGUIPlayer localhost 10000 ABCD");
         }
+		if(args.length > 3 && args[3].equals("retina")){
+			p.retina = true;
+		}
         p.start(args[0], args[1], args[2]);
     }
 
@@ -244,6 +254,8 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
     private final BufferedImage img_u, img_r, img_b;
     private final BufferedImage img_arrow_l, img_arrow_r;
 
+	private final boolean retina;
+
     public Canvas(HumanGUIPlayer player) {
         this.player = player;
         this.setSize(DIM, DIM);
@@ -260,6 +272,9 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+		this.retina = player.retina;
+		System.out.println("retina:" + retina);
     }
 
     public void paintComponent(Graphics g) {
@@ -321,30 +336,52 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
     private void paintItems(Graphics2D g) {
         g.setFont(font2);
         final AffineTransform at = new AffineTransform();
-        at.rotate(180 * Math.PI / 180.0, DIM / 2, DIM / 2);
+		if(retina){
+			at.rotate(180 * Math.PI / 180.0, DIM / 2 * 2, DIM / 2 * 2);
+		}else{
+			at.rotate(180 * Math.PI / 180.0, DIM / 2, DIM / 2);
+		}
         g.setTransform(at);
         for (int i = 0; i < player.enemy.length; i++) {
             P p = player.enemy[i];
             if(isOwnOccupied(5-p.x, 5-p.y) == false){
 				BufferedImage img = p.c == ItemColor.RED ? img_r : p.c == ItemColor.BLUE ? img_b : img_u;
-                g.drawImage(img, convX(p.x), convY(p.y), dim, dim, null); // to rotate
-				g.drawString(label[p.id], convX(p.x)+2, convY(p.y)+16);
+				if(retina){
+					g.drawImage(img, convX2(p.x), convY2(p.y), dim*2, dim*2, null); // to rotate
+					g.drawString(label[p.id], convX2(p.x)+2, convY2(p.y)+16);
+				}else{
+					g.drawImage(img, convX(p.x), convY(p.y), dim, dim, null); // to rotate
+					g.drawString(label[p.id], convX(p.x)+2, convY(p.y)+16);
+				}
             }
         }
-        at.rotate(180 * Math.PI / 180.0, DIM / 2, DIM / 2);
+		if(retina){
+			at.rotate(180 * Math.PI / 180.0, DIM / 2 * 2, DIM / 2 * 2);
+		}else{
+			at.rotate(180 * Math.PI / 180.0, DIM / 2, DIM / 2);
+		}
         g.setTransform(at);
         for (int i = 0; i < player.own.length; i++) {
             if (selected != i) {
                 P p = player.own[i];
                 BufferedImage img = p.c == ItemColor.RED ? img_r : p.c == ItemColor.BLUE ? img_b : img_u;
-                g.drawImage(img, convX(p.x), convY(p.y), dim, dim, null);
-				g.drawString(label[p.id], convX(p.x)+2, convY(p.y)+16);
+				if(retina){
+					g.drawImage(img, convX2(p.x), convY2(p.y), dim*2, dim*2, null);
+					g.drawString(label[p.id], convX2(p.x)+2, convY2(p.y)+16);
+				}else{
+					g.drawImage(img, convX(p.x), convY(p.y), dim, dim, null);
+					g.drawString(label[p.id], convX(p.x)+2, convY(p.y)+16);
+				}
             }
         }
         if (selected != -1) {
             P p = player.own[selected];
             BufferedImage img = p.c == ItemColor.RED ? img_r : p.c == ItemColor.BLUE ? img_b : img_u;
-            g.drawImage(img, selectedX, selectedY, dim, dim, null);
+			if(retina){
+				g.drawImage(img, selectedX*2, selectedY*2, dim*2, dim*2, null);
+			}else{
+				g.drawImage(img, selectedX, selectedY, dim, dim, null);
+			}
 			g.drawString(label[p.id], convX(selectedX)+2, convY(selectedY)+16);
         }
     }
@@ -355,6 +392,14 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
 
     private int convY(int y) {
         return dim * (y + 1);
+    }
+
+    private int convX2(int x) {
+        return 2 * dim * (x + 1);
+    }
+
+    private int convY2(int y) {
+        return 2 * dim * (y + 1);
     }
 
     private boolean isInternal(P p, int x, int y) {
