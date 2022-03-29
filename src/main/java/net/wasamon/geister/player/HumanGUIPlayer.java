@@ -379,10 +379,11 @@ class Canvas extends JPanel implements MouseListener, MouseMotionListener {
             BufferedImage img = p.c == ItemColor.RED ? img_r : p.c == ItemColor.BLUE ? img_b : img_u;
 			if(retina){
 				g.drawImage(img, selectedX*2, selectedY*2, dim*2, dim*2, null);
+				g.drawString(label[p.id], selectedX*2+2, selectedY*2+16);
 			}else{
 				g.drawImage(img, selectedX, selectedY, dim, dim, null);
+				g.drawString(label[p.id], selectedX+2, selectedY+16);
 			}
-			g.drawString(label[p.id], convX(selectedX)+2, convY(selectedY)+16);
         }
     }
 
