@@ -59,11 +59,13 @@ Geister用のゲームサーバ．
 
 ## 実行例
 ### コンパイル
+
     gradle jar
 
-gradle-6.9.2 でビルドできることを確認しています．7系ではビルドできません．
+gradle-6.9.2 または gradle-7.4.1 でビルドできることを確認しています．
 
 ### サーバー
+
     java -jar build/libs/geister.jar
 
 でサーバーが起動します．
