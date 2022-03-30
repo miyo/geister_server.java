@@ -6,17 +6,18 @@ repositories {
 }
 
 dependencies {
-  compile fileTree(dir: 'libs', include: '*.jar')
-  compile 'org.glassfish.tyrus:tyrus-server:1.+'
-  compile 'org.glassfish.tyrus:tyrus-client:1.+'
-  compile 'org.glassfish.tyrus:tyrus-container-grizzly:1.+'
-  compile 'org.glassfish.tyrus:tyrus-container-grizzly-server:1.+'
-  testCompile 'junit:junit:4.+'
+  implementation fileTree(dir: 'libs', include: '*.jar')
+  implementation 'org.glassfish.tyrus:tyrus-server:1.+'
+  implementation 'org.glassfish.tyrus:tyrus-client:1.+'
+  implementation 'org.glassfish.tyrus:tyrus-container-grizzly:1.+'
+  implementation 'org.glassfish.tyrus:tyrus-container-grizzly-server:1.+'
+  testImplementation 'junit:junit:4.+'
 }
 
 jar.baseName = 'geister'
 
 jar {
   manifest.attributes 'Main-Class': 'net.wasamon.geister.server.TCPServerWithBlock'
-  from configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) }
+  from configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
